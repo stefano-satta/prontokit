@@ -10,4 +10,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  optimizeDeps: {
+    // Importate solo dal worker Excel, che lo scanner di Vite non esplora: senza questa riga in sviluppo
+    // vengono scoperte al primo uso e Vite ricarica la pagina, interrompendo la conversione (e gli e2e)
+    include: ['xlsx', 'fflate'],
+  },
 });
