@@ -1,0 +1,38 @@
+# Deploy su Netlify: sito statico generato da Vite, nessuna function né backend.
+
+[build]
+  command = "npm run build"
+  publish = "client/dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# SPA: ogni percorso che non è un file reale lo gestisce React Router (anche la pagina 404).
+# I file esistenti (assets, pdfjs, favicon) hanno la precedenza perché la regola non è forzata.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# La CSP principale è nel <meta> generato da client/vite/contentSecurityPolicy.ts;
+# frame-ancestors funziona solo come header, quindi si aggiunge qui (le due policy si sommano).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    # Microfono solo per la trascrizione vocale; tutto il resto spento
+    Permissions-Policy = "microphone=(self), camera=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+
+# File con hash nel nome: non cambiano mai, si possono tenere in cache per un anno
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/pdfjs/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

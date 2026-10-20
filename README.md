@@ -48,6 +48,16 @@ Apri http://localhost:5173. Non servono variabili d'ambiente.
 | `npm test`          | Test unitari (convertitori, parser, logica delle utility) |
 | `npm run test:e2e`  | Test Playwright desktop + mobile                     |
 
+## Deploy (Netlify)
+
+Il sito è statico e si pubblica su Netlify dal repository GitHub `stefano-satta/prontokit`: ogni push su `main` fa un nuovo deploy, ogni pull request un'anteprima. La configurazione è tutta in `netlify.toml`:
+
+- **Build**: `npm run build` dalla root (Node 24), pubblica `client/dist`. Nessuna variabile d'ambiente.
+- **SPA**: ogni percorso che non è un file reale va a `index.html` con stato 200, così React Router gestisce le route e la pagina 404.
+- **Header**: `frame-ancestors 'none'` (il resto della CSP è nel `<meta>` generato dal build), `nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` con il solo microfono (per la trascrizione vocale), `Cross-Origin-Opener-Policy`. Gli asset con hash in `/assets/` sono in cache per un anno.
+
+Per provare la build di produzione in locale: `npm run build`, poi `npm run preview -w client` (porta 4173).
+
 ## PDF in Markdown: privacy e sicurezza
 
 - **Il documento non lascia mai il dispositivo.** Il PDF viene letto in memoria e analizzato con PDF.js in un Web Worker; non esiste alcun endpoint di upload. Un test e2e verifica che durante la conversione non parta nessuna richiesta di rete con dati.

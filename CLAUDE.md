@@ -138,8 +138,9 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
     cronologia degli ultimi 5 link nel `localStorage` (`short-url-history`); il contatore "Servizio utilizzato N volte" deve partire da zero in produzione.
 - In sospeso, da non implementare senza indicazioni dell'utente:
   - **Riassunto PDF via AI:** il piano gratuito di Gemini non si può usare per utenti nel SEE (EEA).
-  - **Deploy e CI su Netlify** (frontend statico; un futuro backend potrebbe andare su Firebase, solo con piani gratuiti: scelta dell'utente).
-- Repository git su GitHub: fai commit e push solo se l'utente lo chiede.
+- Repository git su GitHub (`stefano-satta/prontokit`, pubblico): fai commit e push solo se l'utente lo chiede. Niente segreti nel repository.
+- **Deploy:** Netlify collegato a GitHub, configurato in `netlify.toml` (build, regola SPA, header di sicurezza e cache). Una nuova pagina o API del browser
+  può richiedere di aggiornare `Permissions-Policy` lì. Un futuro backend potrebbe andare su Firebase, solo con piani gratuiti (scelta dell'utente).
 
 ## Prima di chiudere un'attività
 1. `npm run typecheck` (obbligatorio).
