@@ -24,7 +24,7 @@ const EMPTY: Texts = { left: '', right: '' };
 
 const EXAMPLE: Texts = {
   left: `{
-  "nome": "UtilityApp",
+  "nome": "ProntoKit",
   "versione": "1.4.0",
   "attivo": true,
   "utility": ["qr-code", "short-url", "grafici"],
@@ -34,7 +34,7 @@ const EXAMPLE: Texts = {
   }
 }`,
   right: `{
-  "nome": "UtilityApp",
+  "nome": "ProntoKit",
   "versione": "1.5.0",
   "attivo": true,
   "utility": ["qr-code", "short-url", "grafici", "json-diff"],

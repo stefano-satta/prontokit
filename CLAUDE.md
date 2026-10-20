@@ -1,4 +1,4 @@
-# UtilityApp: guida per Claude Code
+# ProntoKit: guida per Claude Code
 
 Raccolta di utility web pubbliche, senza account. Interfaccia e copy in **italiano**; rispondi all'utente in italiano.
 **Solo frontend**: nessun backend nel progetto (vedi "Short URL disattivato" sotto).
@@ -39,7 +39,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
 - `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`).
 - `components/layouts/`: `RootLayout` (skip link, Navbar, `<main>`, Footer).
 - `config/utilities.ts`: **unica fonte** delle utility; navbar, card della home e router leggono da qui.
-  `config/site.ts`: nome app, link autore ed email di contatto (`contactEmail`, usata dai mailto della pagina About) (non ripetere la stringa "UtilityApp").
+  `config/site.ts`: nome app, link autore ed email di contatto (`contactEmail`, usata dai mailto della pagina About) (non ripetere la stringa "ProntoKit").
   `config/footerLinks.ts`: menu del footer (About `/about`, Privacy `/privacy`, Termini `/termini`), fuori dalla navbar; il router
   registra solo le voci con `loadPage`. Se torna lo short URL, i loro path vanno tra i codici riservati (`RESERVED_CODES` del server, `aliasRules.ts`).
   Una voce di `UTILITIES` con `enabled: false` resta nel codice ma non compare in navbar e home e non ha route (oggi: `short-url`).
