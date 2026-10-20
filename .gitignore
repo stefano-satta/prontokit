@@ -1,0 +1,37 @@
+# Dipendenze
+node_modules/
+
+# Build, cache e report dei test
+dist/
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Variabili d'ambiente: chiavi e segreti non vanno mai nel repository
+.env
+.env.*
+!.env.example
+
+# Log
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor e IDE
+.vscode/
+.idea/
+.fleet/
+.zed/
+.cursor/
+*.swp
+*~
+
+# Configurazioni locali di Claude Code e cache del plugin di design
+.claude/
+.impeccable/

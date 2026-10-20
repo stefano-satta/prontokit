@@ -1,0 +1,19 @@
+{
+  "name": "utility-hub",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w client",
+    "build": "npm run build -w client",
+    "typecheck": "npm run typecheck -w client",
+    "test": "npm run test -w client",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "pdf-lib": "^1.17.1"
+  }
+}
