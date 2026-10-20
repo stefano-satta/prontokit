@@ -196,7 +196,7 @@ export default function JsonDiffPage() {
             <JsonEditor
               key={side}
               id={`json-${side}`}
-              label={`${SIDE_LABELS[side]}`}
+              label={SIDE_LABELS[side]}
               value={texts[side]}
               onChange={(value) => edit(side, value)}
               placeholder={side === 'left' ? 'Incolla qui il JSON di partenza' : 'Incolla qui il JSON da confrontare e correggere'}

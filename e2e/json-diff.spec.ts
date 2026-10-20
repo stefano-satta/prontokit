@@ -8,11 +8,11 @@ test.describe('Confronto JSON', () => {
   });
 
   test('segnala JSON identici ed equivalenti', async ({ page }) => {
-    await page.getByLabel('Sinistra · Originale').fill('{"a":1,"b":[1,2]}');
-    await page.getByLabel('Destra · Modificato').fill('{"a":1,"b":[1,2]}');
+    await page.getByLabel('Originale', { exact: true }).fill('{"a":1,"b":[1,2]}');
+    await page.getByLabel('Modificato', { exact: true }).fill('{"a":1,"b":[1,2]}');
     await expect(page.getByTestId('diff-verdict')).toHaveText('I due JSON sono identici.');
 
-    await page.getByLabel('Destra · Modificato').fill('{\n  "b": [1, 2],\n  "a": 1\n}');
+    await page.getByLabel('Modificato', { exact: true }).fill('{\n  "b": [1, 2],\n  "a": 1\n}');
     await expect(page.getByTestId('diff-verdict')).toContainText('Stessi dati');
   });
 
@@ -39,8 +39,8 @@ test.describe('Confronto JSON', () => {
   });
 
   test('formatta e minifica solo il JSON di destra, con annulla', async ({ page }) => {
-    const left = page.getByLabel('Sinistra · Originale');
-    const right = page.getByLabel('Destra · Modificato');
+    const left = page.getByLabel('Originale', { exact: true });
+    const right = page.getByLabel('Modificato', { exact: true });
     await expect(page.getByRole('button', { name: 'Scambia' })).toHaveCount(0);
     await left.fill('{"a":{"b":[]}}');
     await expect(page.getByRole('button', { name: 'Formatta' })).toBeDisabled();
