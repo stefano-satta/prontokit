@@ -61,6 +61,19 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
+      <LegalSection title="Hosting e badge di Netlify">
+        <p>
+          Il sito è ospitato da Netlify, che sul piano gratuito aggiunge in basso a destra il badge «Powered by
+          Netlify». Il codice del badge è di Netlify ed è servito dal nostro stesso indirizzo: mostra il badge e i suoi
+          link, non legge quello che inserisci negli strumenti e non invia dati. Se apri i suoi link o usi il suo modulo
+          arrivi sul sito di Netlify, dove vale la{' '}
+          <a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener noreferrer" className={linkClass}>
+            privacy policy di Netlify
+          </a>
+          .
+        </p>
+      </LegalSection>
+
       <LegalSection title="Base giuridica e diritti">
         <p>
           Gli strumenti non raccolgono dati personali. I log tecnici dell'hosting sono trattati per il legittimo

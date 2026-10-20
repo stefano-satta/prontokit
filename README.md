@@ -54,6 +54,7 @@ Il sito è statico e si pubblica su Netlify dal repository GitHub `stefano-satta
 
 - **Build**: `npm run build` dalla root (Node 24), pubblica `client/dist`. Nessuna variabile d'ambiente.
 - **SPA**: ogni percorso che non è un file reale va a `index.html` con stato 200, così React Router gestisce le route e la pagina 404.
+- **Badge di Netlify**: sul piano gratuito Netlify inietta `/.netlify/scripts/hud`, che disegna il badge in un iframe `srcdoc` con uno script inline. La CSP lo consente tramite hash (`NETLIFY_BADGE_SCRIPT_HASH` in `client/vite/contentSecurityPolicy.ts`): se Netlify cambia lo script, la console del sito mostra un errore CSP con il nuovo hash da copiare lì.
 - **Header**: `frame-ancestors 'none'` (il resto della CSP è nel `<meta>` generato dal build), `nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` con il solo microfono (per la trascrizione vocale), `Cross-Origin-Opener-Policy`. Gli asset con hash in `/assets/` sono in cache per un anno.
 
 Per provare la build di produzione in locale: `npm run build`, poi `npm run preview -w client` (porta 4173).
@@ -64,7 +65,7 @@ Per provare la build di produzione in locale: `npm run build`, poi `npm run prev
 - **Niente persistenza.** Il file e il Markdown vivono solo nello stato React: vengono rilasciati a fine conversione, con "Converti un altro file" o chiudendo la pagina. Nessun `localStorage`, nessun log. La crittografia non serve perché non c'è né trasmissione né archiviazione.
 - **Validazione reale del file.** Si controlla la firma `%PDF-` nei primi byte (estensione e MIME type si possono falsificare) e il limite di 25 MB.
 - **PDF.js configurato in modo restrittivo.** Form XFA disattivati, nessun caricamento di font remoti; le CMap per le lingue non latine sono servite dalla nostra origine (plugin `client/vite/pdfjsAssets.ts`), mai da CDN.
-- **Content Security Policy in produzione** (`client/vite/contentSecurityPolicy.ts`): script e connessioni solo verso la stessa origine, così nessun codice di terze parti può esfiltrare i contenuti. Lo script del tema è un file esterno (`public/theme-init.js`) proprio per non dover consentire script inline.
+- **Content Security Policy in produzione** (`client/vite/contentSecurityPolicy.ts`): script e connessioni solo verso la stessa origine, così nessun codice di terze parti può esfiltrare i contenuti. Unica eccezione: lo script inline del badge «Powered by Netlify» (piano gratuito), consentito solo con il suo hash SHA-256, più `app.netlify.com` in `form-action` per il modulo del badge; nessuna connessione esterna è permessa. Lo script del tema è un file esterno (`public/theme-init.js`) proprio per non dover consentire script inline.
 - **PDF protetti da password.** La password serve solo ad aprire il file nel browser e non viene salvata.
 - **Nome del file scaricato ripulito** da percorsi e caratteri riservati.
 

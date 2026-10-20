@@ -123,6 +123,8 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   - Password mai salvata (niente `localStorage`) né inviata.
 - **CSP in produzione** (`client/vite/contentSecurityPolicy.ts`): script e connessioni solo `'self'`.
   - Niente script inline: per questo il tema iniziale è in `public/theme-init.js`.
+  - Unica eccezione (scelta dell'utente): lo script inline del badge di Netlify, consentito per hash (`NETLIFY_BADGE_SCRIPT_HASH`), più `https://app.netlify.com` in `form-action`.
+    Se cambia lo script, aggiorna l'hash dall'errore CSP in console. Mai `'unsafe-inline'` negli script. La Privacy descrive il badge.
   - Una nuova dipendenza esterna (API, font, CDN) richiede di aggiornare la CSP e di valutarne l'impatto sulla privacy.
 - **Nuova utility:**
   - crea `pages/XPage.tsx`, i componenti in `components/features/<x>/` e una voce in `UTILITIES`;
