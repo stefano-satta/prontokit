@@ -8,9 +8,14 @@ let nextId = 0;
 
 async function checkPdf(file: File) {
   if (file.size === 0) return { ok: false, reason: 'empty' } as const;
-  const validation = await validatePdf(file);
-  if (!validation.ok) return { ok: false, reason: validation.code === 'too-large' ? 'too-large' : 'invalid' } as const;
-  return inspectPdf(file);
+  try {
+    const validation = await validatePdf(file);
+    if (!validation.ok) return { ok: false, reason: validation.code === 'too-large' ? 'too-large' : 'invalid' } as const;
+    return await inspectPdf(file);
+  } catch {
+    // Un file che il browser non riesce a leggere non deve lasciare la pagina in "Controllo dei PDF…"
+    return { ok: false, reason: 'unreadable' } as const;
+  }
 }
 
 /**
@@ -24,7 +29,14 @@ export const usePdfMerge = () => {
   const [checking, setChecking] = useState(false);
 
   const pdfsRef = useRef<SelectedPdf[]>([]);
+  /** Cresce a ogni unione e con "Svuota": i risultati di un lavoro superato vengono scartati */
   const runRef = useRef(0);
+  /**
+   * Smontaggio separato dal contatore: in sviluppo StrictMode smonta e rimonta gli effetti dopo il primo disegno,
+   * e un contatore aumentato lì scartava i file trascinati in quell'istante, lasciando la pagina bloccata.
+   */
+  const mountedRef = useRef(false);
+  const isCurrent = (run: number) => mountedRef.current && run === runRef.current;
 
   const updatePdfs = (next: SelectedPdf[]) => {
     pdfsRef.current = next;
@@ -39,7 +51,7 @@ export const usePdfMerge = () => {
     // Uno alla volta: analizzare insieme cinque PDF grandi può esaurire la memoria su mobile
     const checks = [];
     for (const file of files) checks.push({ file, check: await checkPdf(file) });
-    if (run !== runRef.current) return;
+    if (!isCurrent(run)) return;
     setChecking(false);
 
     const rejected: { name: string; reason: PdfRejectReason }[] = [];
@@ -73,7 +85,7 @@ export const usePdfMerge = () => {
     setPhase({ status: 'merging' });
     try {
       const blob = await mergePdfs(selected.map((pdf) => pdf.document));
-      if (run !== runRef.current) return;
+      if (!isCurrent(run)) return;
       setPhase({
         status: 'done',
         result: {
@@ -84,7 +96,7 @@ export const usePdfMerge = () => {
         },
       });
     } catch {
-      if (run !== runRef.current) return;
+      if (!isCurrent(run)) return;
       setPhase({
         status: 'error',
         message: 'L’unione non è riuscita: uno dei PDF potrebbe essere danneggiato o troppo grande per questo browser. Rimuovilo e riprova.',
@@ -100,12 +112,12 @@ export const usePdfMerge = () => {
     setPhase({ status: 'selecting' });
   }, []);
 
-  useEffect(
-    () => () => {
-      runRef.current++;
-    },
-    [],
-  );
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   return { pdfs, phase, notices, checking, addFiles, removePdf, movePdf, merge, reset };
 };
