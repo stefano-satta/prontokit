@@ -8,14 +8,15 @@ Web Speech API del browser, tasti di punteggiatura, download `.txt` e copia del 
 o linee da righe `etichetta;valore`, tabella dei dati, PNG e copia SVG, solo nel browser), `/json-diff` (confronto di due JSON
 riga per riga, errori di sintassi con riga e colonna, Formatta/Minifica, download `.json` e copia del lato destro, solo nel browser), `/image-converter` (fino a 5 immagini JPG/PNG/WebP/AVIF/BMP in PNG, JPG o WebP,
 tabella dei risultati e ZIP, solo nel browser), `/pdf-merge` (da 2 a 5 PDF uniti in uno, nell'ordine scelto, PDF protetti scartati, solo nel browser),
-`/password-generator` (password casuali da 10 a 30 caratteri, tipi di caratteri a scelta, indicatore debole/accettabile/forte, copia; solo nel browser).
+`/password-generator` (password casuali da 10 a 30 caratteri, tipi di caratteri a scelta, indicatore debole/accettabile/forte, copia; solo nel browser),
+`/quote-generator` (preventivo con voci illimitate, sconti, imponibile + IVA + totale, condizioni, firma, logo e colore; anteprima e PDF A4 con pdf-lib, solo nel browser).
 Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il contesto di prodotto.
 
 ## Stack
 - npm workspaces con il solo `client/` (la root tiene Playwright e gli script). Node 24 (README: 20+). Moduli ESM ovunque.
 - **Client:** React 19, TypeScript strict, React Router 8 (`createBrowserRouter`, route lazy), Vite 8,
   Tailwind CSS v4 (`@tailwindcss/vite`, nessun `tailwind.config`), lucide-react, tailwind-merge, qrcode,
-  chart.js + react-chartjs-2, pdfjs-dist (worker), pdf-lib (unione PDF), xlsx (SheetJS CE dal tarball cdn.sheetjs.com, in worker), fflate (ZIP), font Inter Variable.
+  chart.js + react-chartjs-2, pdfjs-dist (worker), pdf-lib (unione PDF e preventivi), xlsx (SheetJS CE dal tarball cdn.sheetjs.com, in worker), fflate (ZIP), font Inter Variable.
 - **Test:** Vitest (client), Playwright (e2e, progetti `desktop` e `mobile` Pixel 7).
 
 ## Comandi (dalla root)
@@ -36,7 +37,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   "Tools" (disclosure con l'elenco di `UTILITIES`: pannello di vetro allineato a destra su desktop, largo quanto l'isola
   con velo su mobile; si chiude con Esc, click fuori o cambio pagina), cambio tema. Il vetro è un livello separato:
   un `backdrop-filter` sull'antenato impedirebbe la sfocatura della tendina.
-- `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`).
+- `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`, `quote`).
 - `components/layouts/`: `RootLayout` (skip link, Navbar, `<main>`, Footer).
 - `config/utilities.ts`: **unica fonte** delle utility; navbar, card della home e router leggono da qui.
   `config/site.ts`: nome app, link autore ed email di contatto (`contactEmail`, usata dai mailto della pagina About) (non ripetere la stringa "ProntoKit").
@@ -46,10 +47,10 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
 - `hooks/`: tutti gli hook React. `models/`: tutti i tipi e le interfacce condivisi.
 - `lib/`: funzioni pure senza React (validazioni, `cn`, http, download, `fileName` per nomi sicuri,
   `pdf-markdown/` e `excel-csv/` per la logica di conversione, `speech-to-text/` per lingue, unione dei frammenti e inserimento della punteggiatura,
-  `chart-generator/` per parsing dei dati, palette, configurazione Chart.js e SVG della tabella, `json-diff/` per analisi, formattazione e diff riga per riga, `image-converter/` per firme dei formati, nomi dei file e avvisi di selezione, `pdf-merge/` per avvisi, ordinamento, nome del file e ricerca di `/Encrypt`, `password-generator/` per gruppi di caratteri, generazione e forza).
+  `chart-generator/` per parsing dei dati, palette, configurazione Chart.js e SVG della tabella, `json-diff/` per analisi, formattazione e diff riga per riga, `image-converter/` per firme dei formati, nomi dei file e avvisi di selezione, `pdf-merge/` per avvisi, ordinamento, nome del file e ricerca di `/Encrypt`, `password-generator/` per gruppi di caratteri, generazione e forza, `quote/` per calcoli in `BigInt`, validazione, date, IBAN, formattazione e testo stampabile nel PDF).
 - `services/`: accesso ad API e librerie esterne (`shortUrlApi`, `qrGenerator`, `pdf/`, `excel/`: SheetJS nel worker
   `excelToCsv.worker.ts`, ZIP con fflate, `speechRecognition` per Web Speech API e permesso microfono, `chart/` per registrazione di Chart.js,
-  export PNG fuori schermo e conversione SVG → PNG, `image/` per conversione via canvas e ZIP delle immagini, `pdf-merge/` per lettura e unione con pdf-lib).
+  export PNG fuori schermo e conversione SVG → PNG, `image/` per conversione via canvas e ZIP delle immagini, `pdf-merge/` per lettura e unione con pdf-lib, `quote/` per PDF del preventivo con pdf-lib, anteprima con PDF.js e preparazione del logo).
 - `styles/index.css`: token di design, regole cursor, keyframes. `client/vite/`: plugin Vite (CSP, asset PDF.js).
 
 ## Convenzioni di codice
@@ -121,6 +122,14 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   - Simboli senza spazi, virgolette e backslash. Cifre e simboli colorati nella password solo per leggibilità.
   - Forza = entropia (lunghezza × log2 dei caratteri possibili): sotto 60 bit Debole (rosso), da 60 a 79 Accettabile (ambra), da 80 Forte (verde); soglie in `passwordStrength.ts`. Il livello è sempre scritto, mai solo colore, e c'è la legenda.
   - Password mai salvata (niente `localStorage`) né inviata.
+- **Generatore di preventivi** (dettagli nel README):
+  - Preventivo, non fattura (scelta dell'utente, per evitare obblighi fiscali): niente XML FatturaPA, niente diciture fiscali obbligatorie; la nota in pagina lo dice.
+  - Una sola aliquota IVA per tutto il preventivo (scelta dell'utente): imponibile, IVA da aggiungere, totale da pagare. Importi in centesimi con `BigInt`, arrotondamento a metà per eccesso, IVA calcolata una volta sull'imponibile.
+  - Nessun salvataggio (scelta dell'utente): niente `localStorage`, niente richieste di rete con i dati (un e2e lo verifica).
+  - Sezioni scelte dall'utente: validità (giorni o data), condizioni (pagamento, consegna, IBAN, note), firma per accettazione, sconto globale (% o importo).
+  - PDF in Helvetica standard: il testo passa sempre da `toPdfText` (WinAnsi), altrimenti pdf-lib si blocca. L'anteprima ridisegna il PDF con PDF.js usando i font standard serviti da `/pdfjs/standard_fonts/`.
+  - Colori del PDF in `lib/quote/accentColors.ts` (tutti con testo bianco ≥ 4,5:1); sono dati del documento, non token del tema.
+  - Le griglie del modulo usano container query (`@container` in `QuoteSection`), perché la colonna del modulo è stretta accanto all'anteprima.
 - **CSP in produzione** (`client/vite/contentSecurityPolicy.ts`): script e connessioni solo `'self'`.
   - Niente script inline: per questo il tema iniziale è in `public/theme-init.js`.
   - Unica eccezione (scelta dell'utente): lo script inline del badge di Netlify, consentito per hash (`NETLIFY_BADGE_SCRIPT_HASH`), più `https://app.netlify.com` in `form-action`.

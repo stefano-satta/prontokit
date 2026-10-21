@@ -1,4 +1,4 @@
-import { ChartColumn, Combine, FileDiff, FileSpreadsheet, FileText, ImageUp, KeyRound, Link2, Mic, QrCode } from 'lucide-react';
+import { ChartColumn, Combine, FileDiff, FileSignature, FileSpreadsheet, FileText, ImageUp, KeyRound, Link2, Mic, QrCode } from 'lucide-react';
 import { ChartGeneratorPreview } from '../components/features/chart-generator/ChartGeneratorPreview';
 import { ExcelCsvPreview } from '../components/features/excel-csv/ExcelCsvPreview';
 import { ImageConverterPreview } from '../components/features/image-converter/ImageConverterPreview';
@@ -7,6 +7,7 @@ import { PdfMarkdownPreview } from '../components/features/pdf-markdown/PdfMarkd
 import { PasswordGeneratorPreview } from '../components/features/password-generator/PasswordGeneratorPreview';
 import { PdfMergePreview } from '../components/features/pdf-merge/PdfMergePreview';
 import { QrPreview } from '../components/features/qr/QrPreview';
+import { QuoteGeneratorPreview } from '../components/features/quote/QuoteGeneratorPreview';
 import { ShortUrlPreview } from '../components/features/short-url/ShortUrlPreview';
 import { SpeechToTextPreview } from '../components/features/speech-to-text/SpeechToTextPreview';
 import type { Utility } from '../models/utility';
@@ -16,6 +17,16 @@ import type { Utility } from '../models/utility';
  * Per aggiungere una utility basta aggiungere una voce.
  */
 const ALL_UTILITIES: readonly Utility[] = [
+  {
+    id: 'quote-generator',
+    path: '/quote-generator',
+    navLabel: 'Preventivi',
+    title: 'Generatore di preventivi',
+    description: 'Crea un preventivo con voci, sconti e IVA calcolati da soli, con il tuo logo e i tuoi colori. Scaricalo in PDF.',
+    icon: FileSignature,
+    preview: QuoteGeneratorPreview,
+    loadPage: () => import('../pages/QuoteGeneratorPage'),
+  },
   {
     id: 'qr-code',
     path: '/qr-code',

@@ -8,7 +8,8 @@ test.describe('Home', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Meno tempo perso. Più cose fatte.');
 
     const cards = page.getByRole('main').getByRole('link');
-    await expect(cards).toHaveCount(9);
+    await expect(cards).toHaveCount(10);
+    await expect(cards.first()).toContainText('Generatore di preventivi');
     await expect(cards.filter({ hasText: 'Generatore di QR code' })).toHaveAttribute('href', '/qr-code');
     await expect(cards.filter({ hasText: 'PDF in Markdown' })).toHaveAttribute('href', '/pdf-markdown');
     await expect(cards.filter({ hasText: 'Excel in CSV' })).toHaveAttribute('href', '/excel-csv');
@@ -18,6 +19,7 @@ test.describe('Home', () => {
     await expect(cards.filter({ hasText: 'Convertitore di immagini' })).toHaveAttribute('href', '/image-converter');
     await expect(cards.filter({ hasText: 'Unisci PDF' })).toHaveAttribute('href', '/pdf-merge');
     await expect(cards.filter({ hasText: 'Generatore di password' })).toHaveAttribute('href', '/password-generator');
+    await expect(cards.filter({ hasText: 'Generatore di preventivi' })).toHaveAttribute('href', '/quote-generator');
   });
 
   test('i box portano alle pagine delle utility', async ({ page }) => {
@@ -35,7 +37,7 @@ test.describe('Home', () => {
     await expect(tools).toHaveAttribute('aria-expanded', 'false');
 
     await openTools(page);
-    await expect(nav.getByRole('listitem').getByRole('link')).toHaveCount(12);
+    await expect(nav.getByRole('listitem').getByRole('link')).toHaveCount(13);
     await nav.getByRole('link', { name: 'Unisci PDF' }).click();
     await expect(page).toHaveURL('/pdf-merge');
     await expect(tools).toHaveAttribute('aria-expanded', 'false');

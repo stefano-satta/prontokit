@@ -2,6 +2,7 @@
 
 Raccolta di utility web, solo frontend: tutto gira nel browser e non c'è un backend. Oggi include:
 
+- **Generatore di preventivi** (`/quote-generator`): fornitore, cliente, voci illimitate (descrizione, quantità, unità, prezzo, sconto), sconto globale, imponibile + IVA da aggiungere + totale da pagare, validità, condizioni, firma per accettazione, logo, valuta e colore; anteprima fedele e download del PDF A4, tutto nel browser.
 - **Generatore di QR code** (`/qr-code`): da un URL a un QR code scaricabile in PNG o SVG (generato nel browser).
 - **PDF in Markdown** (`/pdf-markdown`): da un PDF (max 25 MB) a un file Markdown ottimizzato per gli LLM, convertito interamente nel browser.
 - **Excel in CSV** (`/excel-csv`): da un file .xlsx/.xlsm/.xlsb/.xls/.ods (max 25 MB) a un CSV per foglio, o a uno ZIP con tutti i fogli, convertito interamente nel browser.
@@ -19,7 +20,7 @@ La utility **Short URL** (`/short-url`) è implementata nel client ma disattivat
 | Parte    | Tecnologie                                                     |
 | -------- | -------------------------------------------------------------- |
 | Client   | React 19, TypeScript, React Router, Tailwind CSS v4, Vite      |
-| PDF      | PDF.js (Mozilla, Apache-2.0) in Web Worker                     |
+| PDF      | PDF.js (Mozilla, Apache-2.0) in Web Worker, pdf-lib (unione, preventivi) |
 | Excel    | SheetJS CE 0.20.3 (Apache-2.0) in Web Worker, fflate (ZIP)     |
 | Voce     | Web Speech API del browser (nessuna libreria)                  |
 | Grafici  | Chart.js 4 con react-chartjs-2                                 |
@@ -130,20 +131,30 @@ Cosa produce il convertitore: front matter YAML (titolo, sorgente, pagine), tito
 - **Sicurezza**: entropia = lunghezza × log2(caratteri possibili). Meno di 60 bit **Debole** (rosso), da 60 a 79 **Accettabile** (ambra), da 80 **Forte** (verde) (`passwordStrength.ts`). La barra a tre segmenti è accompagnata dal nome del livello, dai bit e da una legenda; se la password non è forte la pagina dice quanti caratteri servono.
 - **Privacy**: la password resta nello stato React; non viene salvata né inviata. Cifre e simboli sono colorati solo per distinguerli a colpo d'occhio (0/O, 1/l).
 
+## Generatore di preventivi: calcoli, PDF e privacy
+
+- **Preventivo, non fattura**: niente contenuto obbligatorio per legge né invio allo SdI, quindi un PDF basta. La pagina lo ricorda sotto l'intestazione. Una fattura vera richiederebbe l'XML FatturaPA (scelta dell'utente: non la facciamo).
+- **Calcoli esatti** (`lib/quote/`): i numeri si leggono all'italiana come nel generatore di grafici (`1.250,50`, anche `1250.5`) e diventano interi scalati con `BigInt`, così non ci sono errori di virgola mobile. Quantità fino a 3 decimali, prezzi unitari fino a 4, sconti fino a 2. Importo di voce = quantità × prezzo × (1 − sconto), arrotondato al centesimo (metà per eccesso). Poi: totale voci → sconto globale (% o importo, mai oltre il totale) → **imponibile** → **IVA** (una sola aliquota per tutto il preventivo, 22/10/5/4/0%, calcolata una volta sull'imponibile) → **totale da pagare**. Con lo 0% si può scrivere il motivo, che va sotto il totale.
+- **Validazione** (`validateQuote.ts`): servono numero, data, validità (da 1 a 365 giorni o una data non precedente), nome del fornitore e del cliente e almeno una voce; le voci compilate devono avere descrizione, quantità maggiore di zero e prezzo. L'IBAN, se c'è, si controlla con il mod 97. Finché manca qualcosa "Scarica PDF" è disattivato e l'elenco accanto dice cosa sistemare; sotto i campi compaiono solo gli errori dei valori già scritti.
+- **PDF** (`services/quote/quotePdf.ts`, pdf-lib): A4, Helvetica standard (non incorporata, file leggero), testo vero e selezionabile. Intestazione con logo e dati del fornitore, titolo, numero, data e scadenza; riquadro del cliente; oggetto; tabella delle voci con l'intestazione ripetuta a ogni pagina (la colonna Sconto compare solo se serve; una descrizione più lunga di una pagina continua sulla successiva); totali e firma mai spezzati; condizioni di pagamento, consegna, IBAN e note solo se compilati; piè di pagina con "Pagina N di M". I caratteri che Helvetica non ha perdono l'accento o diventano `?` (`pdfText.ts`), invece di bloccare il PDF. File: `preventivo_<numero>.pdf`.
+- **Anteprima**: è il PDF stesso, ridisegnato con PDF.js in immagini (350 ms dopo l'ultima modifica). I font standard di PDF.js sono serviti dalla nostra origine (`/pdfjs/standard_fonts/`, plugin `client/vite/pdfjsAssets.ts`), mai da CDN.
+- **Logo**: PNG, JPG, WebP, AVIF o BMP fino a 5 MB, riconosciuto dalla firma; i formati che pdf-lib non legge e le immagini con un lato oltre 1200 px vengono ridisegnati su un canvas.
+- **Privacy**: nessun salvataggio (scelta dell'utente: niente `localStorage`), nessuna richiesta di rete con i dati; un e2e lo verifica. Chiudendo la pagina il preventivo si perde, e la nota in pagina lo dice.
+
 ## Architettura
 
 ```
 client/src
   components/
     common/             componenti comuni riusabili (Button, TextField, Panel, Logo, Navbar, ToolsMenu, Footer, ...)
-    features/           componenti composti, divisi per area (home, qr, short-url, pdf-markdown, excel-csv, speech-to-text, chart-generator, json-diff, image-converter, pdf-merge, password-generator)
+    features/           componenti composti, divisi per area (home, qr, short-url, pdf-markdown, excel-csv, speech-to-text, chart-generator, json-diff, image-converter, pdf-merge, password-generator, quote)
     layouts/            layout delle pagine (RootLayout con navbar e footer)
   config/               utilities.ts (unica fonte delle utility per navbar, home e router; `enabled: false` le nasconde) e site.ts (nome app, link autore)
   hooks/                hook React (useShortUrls, useQrCode, useTheme, ...)
-  lib/                  funzioni pure di supporto (validazione, http, download, cn, pdf-markdown/, excel-csv/, speech-to-text/, chart-generator/, json-diff/, image-converter/, pdf-merge/)
+  lib/                  funzioni pure di supporto (validazione, http, download, cn, pdf-markdown/, excel-csv/, speech-to-text/, chart-generator/, json-diff/, image-converter/, pdf-merge/, password-generator/, quote/)
   models/               interfacce e tipi condivisi
   pages/                una pagina per route, caricata in lazy (la 404 è fuori dal layout)
-  services/             accesso a API e librerie esterne (shortUrlApi, qrGenerator, pdf/, excel/, speechRecognition, chart/, image/, pdf-merge/)
+  services/             accesso a API e librerie esterne (shortUrlApi, qrGenerator, pdf/, excel/, speechRecognition, chart/, image/, pdf-merge/, quote/)
   styles/               stili globali e token di design (index.css)
 ```
 
