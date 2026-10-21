@@ -38,7 +38,9 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   con velo su mobile; si chiude con Esc, click fuori o cambio pagina), cambio tema. Il vetro è un livello separato:
   un `backdrop-filter` sull'antenato impedirebbe la sfocatura della tendina.
 - `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`, `quote`).
-- `components/layouts/`: `RootLayout` (skip link, Navbar, `<main>`, Footer).
+- `components/layouts/`: `RootLayout` (skip link, Navbar, `<main>`, Footer). Il taglio orizzontale (`overflow-x-clip`, per lo sfondo
+  della home largo 1440px) sta sul contenitore di `<main>` e Footer, mai su un antenato della navbar sticky: in WebKit (Safari e Chrome
+  su iOS) uno sticky dentro un antenato con overflow non è mosso dal compositor e la navbar sobbalza durante lo scroll.
 - `config/utilities.ts`: **unica fonte** delle utility; navbar, card della home e router leggono da qui.
   `config/site.ts`: nome app, link autore ed email di contatto (`contactEmail`, usata dai mailto della pagina About) (non ripetere la stringa "ProntoKit").
   `config/footerLinks.ts`: menu del footer (About `/about`, Privacy `/privacy`, Termini `/termini`), fuori dalla navbar; il router
