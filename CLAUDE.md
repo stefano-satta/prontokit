@@ -32,7 +32,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
 
 ## Struttura client (`client/src`)
 - `pages/`: una pagina per route con `export default` (lazy). `NotFoundPage` è fuori da `RootLayout` (pagina intera).
-- `components/common/`: UI riusabile e generica (Button, TextField, Panel, Navbar, ToolsMenu, Footer, FileDropzone, PrivacyNote, ...).
+- `components/common/`: UI riusabile e generica (Button, TextField, Panel, Dialog, Navbar, ToolsMenu, Footer, FileDropzone, PrivacyNote, ...).
   Navbar "a isola": pillola di vetro centrata (`max-w-2xl`, token `glass*` e `shadow-island`) con Logo, Home (etichetta testuale),
   "Tools" (disclosure con l'elenco di `UTILITIES`: pannello di vetro allineato a destra su desktop, largo quanto l'isola
   con velo su mobile; si chiude con Esc, click fuori o cambio pagina), cambio tema. Il vetro è un livello separato:
@@ -132,6 +132,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   - PDF in Helvetica standard: il testo passa sempre da `toPdfText` (WinAnsi), altrimenti pdf-lib si blocca. L'anteprima ridisegna il PDF con PDF.js usando i font standard serviti da `/pdfjs/standard_fonts/`.
   - Colori del PDF in `lib/quote/accentColors.ts` (tutti con testo bianco ≥ 4,5:1); sono dati del documento, non token del tema.
   - Le griglie del modulo usano container query (`@container` in `QuoteSection`), perché la colonna del modulo è stretta accanto all'anteprima.
+  - Click su una pagina dell'anteprima: `Dialog` (`<dialog>` nativo con `showModal`, Esc e focus di ritorno) con le stesse immagini a 1100px, aperta sulla pagina cliccata.
 - **CSP in produzione** (`client/vite/contentSecurityPolicy.ts`): script e connessioni solo `'self'`.
   - Niente script inline: per questo il tema iniziale è in `public/theme-init.js`.
   - Unica eccezione (scelta dell'utente): lo script inline del badge di Netlify, consentito per hash (`NETLIFY_BADGE_SCRIPT_HASH`), più `https://app.netlify.com` in `form-action`.

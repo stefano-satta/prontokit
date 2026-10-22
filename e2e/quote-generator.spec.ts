@@ -110,6 +110,22 @@ test.describe('Generatore di preventivi', () => {
     await expect(page.getByTestId('preview-pages').getByRole('img')).toHaveCount(pages);
   });
 
+  test("ingrandisce l'anteprima in una finestra e la chiude con Esc", async ({ page }) => {
+    await expect(page.getByTestId('preview-status')).toHaveAttribute('data-status', 'ready');
+    const zoom = page.getByRole('button', { name: 'Ingrandisci la pagina 1 di 1' });
+    await zoom.click();
+    const dialog = page.getByRole('dialog', { name: 'Anteprima del preventivo' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByTestId('preview-dialog-pages').getByRole('img')).toHaveCount(1);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(zoom).toBeFocused();
+
+    await zoom.click();
+    await dialog.getByRole('button', { name: 'Chiudi' }).click();
+    await expect(dialog).toBeHidden();
+  });
+
   test('non invia dati in rete mentre si crea il preventivo', async ({ page }) => {
     const requests: string[] = [];
     page.on('request', (request) => {
