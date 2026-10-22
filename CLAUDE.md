@@ -9,7 +9,8 @@ o linee da righe `etichetta;valore`, tabella dei dati, PNG e copia SVG, solo nel
 riga per riga, errori di sintassi con riga e colonna, Formatta/Minifica, download `.json` e copia del lato destro, solo nel browser), `/image-converter` (fino a 5 immagini JPG/PNG/WebP/AVIF/BMP in PNG, JPG o WebP,
 tabella dei risultati e ZIP, solo nel browser), `/pdf-merge` (da 2 a 5 PDF uniti in uno, nell'ordine scelto, PDF protetti scartati, solo nel browser),
 `/password-generator` (password casuali da 10 a 30 caratteri, tipi di caratteri a scelta, indicatore debole/accettabile/forte, copia; solo nel browser),
-`/quote-generator` (preventivo con voci illimitate, sconti, imponibile + IVA + totale, condizioni, firma, logo e colore; anteprima e PDF A4 con pdf-lib, solo nel browser).
+`/quote-generator` (preventivo con voci illimitate, sconti, imponibile + IVA + totale, condizioni, firma, logo e colore; anteprima e PDF A4 con pdf-lib, solo nel browser),
+`/meta-tags` (meta tag SEO, Open Graph e card di X con contatori per title e description, copia dei tag; solo nel browser).
 Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il contesto di prodotto.
 
 ## Stack
@@ -37,7 +38,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   "Tools" (disclosure con l'elenco di `UTILITIES`: pannello di vetro allineato a destra su desktop, largo quanto l'isola
   con velo su mobile; si chiude con Esc, click fuori o cambio pagina), cambio tema. Il vetro è un livello separato:
   un `backdrop-filter` sull'antenato impedirebbe la sfocatura della tendina.
-- `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`, `quote`).
+- `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`, `quote`, `meta-tags`).
 - `components/layouts/`: `RootLayout` (skip link, Navbar, `<main>`, Footer). Il taglio orizzontale (`overflow-x-clip`, per lo sfondo
   della home largo 1440px) sta sul contenitore di `<main>` e Footer, mai su un antenato della navbar sticky: in WebKit (Safari e Chrome
   su iOS) uno sticky dentro un antenato con overflow non è mosso dal compositor e la navbar sobbalza durante lo scroll.
@@ -49,7 +50,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
 - `hooks/`: tutti gli hook React. `models/`: tutti i tipi e le interfacce condivisi.
 - `lib/`: funzioni pure senza React (validazioni, `cn`, http, download, `fileName` per nomi sicuri,
   `pdf-markdown/` e `excel-csv/` per la logica di conversione, `speech-to-text/` per lingue, unione dei frammenti e inserimento della punteggiatura,
-  `chart-generator/` per parsing dei dati, palette, configurazione Chart.js e SVG della tabella, `json-diff/` per analisi, formattazione e diff riga per riga, `image-converter/` per firme dei formati, nomi dei file e avvisi di selezione, `pdf-merge/` per avvisi, ordinamento, nome del file e ricerca di `/Encrypt`, `password-generator/` per gruppi di caratteri, generazione e forza, `quote/` per calcoli in `BigInt`, validazione, date, IBAN, formattazione e testo stampabile nel PDF).
+  `chart-generator/` per parsing dei dati, palette, configurazione Chart.js e SVG della tabella, `json-diff/` per analisi, formattazione e diff riga per riga, `image-converter/` per firme dei formati, nomi dei file e avvisi di selezione, `pdf-merge/` per avvisi, ordinamento, nome del file e ricerca di `/Encrypt`, `password-generator/` per gruppi di caratteri, generazione e forza, `quote/` per calcoli in `BigInt`, validazione, date, IBAN, formattazione e testo stampabile nel PDF, `meta-tags/` per limiti di lunghezza, validazione e generazione dei tag).
 - `services/`: accesso ad API e librerie esterne (`shortUrlApi`, `qrGenerator`, `pdf/`, `excel/`: SheetJS nel worker
   `excelToCsv.worker.ts`, ZIP con fflate, `speechRecognition` per Web Speech API e permesso microfono, `chart/` per registrazione di Chart.js,
   export PNG fuori schermo e conversione SVG → PNG, `image/` per conversione via canvas e ZIP delle immagini, `pdf-merge/` per lettura e unione con pdf-lib, `quote/` per PDF del preventivo con pdf-lib, anteprima con PDF.js e preparazione del logo).
@@ -133,6 +134,10 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   - Colori del PDF in `lib/quote/accentColors.ts` (tutti con testo bianco ≥ 4,5:1); sono dati del documento, non token del tema.
   - Le griglie del modulo usano container query (`@container` in `QuoteSection`), perché la colonna del modulo è stretta accanto all'anteprima.
   - Click su una pagina dell'anteprima: `Dialog` (`<dialog>` nativo con `showModal`, Esc e focus di ritorno) con le stesse immagini a 1100px, aperta sulla pagina cliccata.
+- **Generatore di meta tag SEO** (dettagli nel README):
+  - Intervalli dei contatori in `lib/meta-tags/lengthLimits.ts` (scelta dell'utente: title 50–60, description 145–160, estremi inclusi): verde solo dentro l'intervallo, fuori avviso ambra «troppo corto»/«troppo lungo», mai blocco.
+  - Campi Open Graph e X vuoti riprendono quelli della pagina; i campi non validi mostrano l'errore e restano fuori dai tag.
+  - Contatore accanto all'etichetta tramite la prop `aside` di `TextField`/`TextAreaField`.
 - **CSP in produzione** (`client/vite/contentSecurityPolicy.ts`): script e connessioni solo `'self'`.
   - Niente script inline: per questo il tema iniziale è in `public/theme-init.js`.
   - Unica eccezione (scelta dell'utente): lo script inline del badge di Netlify, consentito per hash (`NETLIFY_BADGE_SCRIPT_HASH`), più `https://app.netlify.com` in `form-action`.

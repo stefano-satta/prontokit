@@ -1,8 +1,9 @@
-import { ChartColumn, Combine, FileDiff, FileSignature, FileSpreadsheet, FileText, ImageUp, KeyRound, Link2, Mic, QrCode } from 'lucide-react';
+import { ChartColumn, Combine, FileDiff, FileSignature, FileSpreadsheet, FileText, ImageUp, KeyRound, Link2, Mic, QrCode, Tags } from 'lucide-react';
 import { ChartGeneratorPreview } from '../components/features/chart-generator/ChartGeneratorPreview';
 import { ExcelCsvPreview } from '../components/features/excel-csv/ExcelCsvPreview';
 import { ImageConverterPreview } from '../components/features/image-converter/ImageConverterPreview';
 import { JsonDiffPreview } from '../components/features/json-diff/JsonDiffPreview';
+import { MetaTagsPreview } from '../components/features/meta-tags/MetaTagsPreview';
 import { PdfMarkdownPreview } from '../components/features/pdf-markdown/PdfMarkdownPreview';
 import { PasswordGeneratorPreview } from '../components/features/password-generator/PasswordGeneratorPreview';
 import { PdfMergePreview } from '../components/features/pdf-merge/PdfMergePreview';
@@ -128,6 +129,16 @@ const ALL_UTILITIES: readonly Utility[] = [
     icon: KeyRound,
     preview: PasswordGeneratorPreview,
     loadPage: () => import('../pages/PasswordGeneratorPage'),
+  },
+  {
+    id: 'meta-tags',
+    path: '/meta-tags',
+    navLabel: 'Meta tag SEO',
+    title: 'Generatore di meta tag SEO',
+    description: 'Inserisci titolo, descrizione, Open Graph e card di X e copia i meta tag HTML pronti per il <head>.',
+    icon: Tags,
+    preview: MetaTagsPreview,
+    loadPage: () => import('../pages/MetaTagsPage'),
   },
 ];
 

@@ -7,20 +7,26 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id
   error?: string | null;
   prefix?: ReactNode;
   optional?: boolean;
+  /** Contenuto sulla riga dell'etichetta, a destra (es. un contatore); letto anche dagli screen reader */
+  aside?: ReactNode;
 }
 
-export function TextField({ label, hint, error, prefix, optional, className, ...props }: TextFieldProps) {
+export function TextField({ label, hint, error, prefix, optional, aside, className, ...props }: TextFieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
-  const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined;
+  const asideId = `${id}-aside`;
+  const describedBy = [aside && asideId, hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-sm font-medium text-fg">
-        {label}
-        {optional && <span className="ml-1.5 font-normal text-fg-muted">(facoltativo)</span>}
-      </label>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <label htmlFor={id} className="text-sm font-medium text-fg">
+          {label}
+          {optional && <span className="ml-1.5 font-normal text-fg-muted">(facoltativo)</span>}
+        </label>
+        {aside && <span id={asideId}>{aside}</span>}
+      </div>
       <div
         className={cn(
           'flex h-12 items-center overflow-hidden rounded-lg border bg-surface transition-colors',

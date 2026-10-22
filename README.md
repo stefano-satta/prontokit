@@ -12,6 +12,7 @@ Raccolta di utility web, solo frontend: tutto gira nel browser e non c'è un bac
 - **Convertitore di immagini** (`/image-converter`): fino a 5 immagini JPG, PNG, WebP, AVIF o BMP convertite in PNG, JPG o WebP, con tabella dei risultati (miniatura, nome, formato, peso) e download singolo o in ZIP, tutto nel browser.
 - **Unisci PDF** (`/pdf-merge`): da 2 a 5 PDF (max 25 MB ciascuno) uniti in un unico file nell'ordine scelto, tutto nel browser; i PDF protetti vengono scartati.
 - **Generatore di password** (`/password-generator`): password casuali da 10 a 30 caratteri con maiuscole, minuscole, numeri e caratteri speciali a scelta, indicatore di sicurezza (debole, accettabile, forte) con legenda e copia negli appunti, tutto nel browser.
+- **Generatore di meta tag SEO** (`/meta-tags`): page title e meta description con contatore di caratteri (intervalli consigliati 50–60 e 145–160), keywords, autore, canonical URL, Open Graph e card di Twitter / X; i tag HTML compaiono mentre si scrive, pronti da copiare.
 
 La utility **Short URL** (`/short-url`) è implementata nel client ma disattivata (`enabled: false` in `client/src/config/utilities.ts`): ha bisogno di un backend. Il server Express + MongoDB è archiviato fuori dal progetto, in `../utility-hub-backend-backup`, con le istruzioni per ripristinarlo in `RESTORE.md`.
 
@@ -131,6 +132,13 @@ Cosa produce il convertitore: front matter YAML (titolo, sorgente, pagine), tito
 - **Sicurezza**: entropia = lunghezza × log2(caratteri possibili). Meno di 60 bit **Debole** (rosso), da 60 a 79 **Accettabile** (ambra), da 80 **Forte** (verde) (`passwordStrength.ts`). La barra a tre segmenti è accompagnata dal nome del livello, dai bit e da una legenda; se la password non è forte la pagina dice quanti caratteri servono.
 - **Privacy**: la password resta nello stato React; non viene salvata né inviata. Cifre e simboli sono colorati solo per distinguerli a colpo d'occhio (0/O, 1/l).
 
+## Generatore di meta tag SEO: funzionamento
+
+- **Contatori**: title da 50 a 60 caratteri, description da 145 a 160 (`lib/meta-tags/lengthLimits.ts`), estremi inclusi. Google non pubblica limiti ufficiali (tronca in pixel): sono gli intervalli più diffusi nelle guide SEO, scelti dall'utente. Verde solo dentro l'intervallo; fuori il contatore è ambra con «troppo corto» o «troppo lungo», senza bloccare.
+- **Valori ripresi**: og:title, og:description e og:url vuoti riprendono title, description e canonical; i tag di X riprendono quelli di Open Graph. `og:type`, `og:locale` (predefinito `it_IT`) e `twitter:card` (predefinita `summary_large_image`) compaiono solo se c'è almeno un altro tag della sezione.
+- **Validazione**: URL http(s) con `validateUrl` (senza protocollo si aggiunge `https://`), lingua `xx_XX`, account X fino a 15 caratteri (la `@` si aggiunge da sola). I campi non validi mostrano l'errore e restano fuori dai tag. Keywords senza vuoti né doppioni; testo con `&`, `"`, `<`, `>` escapato.
+- **Privacy**: tutto nel browser, nessun salvataggio né richiesta di rete.
+
 ## Generatore di preventivi: calcoli, PDF e privacy
 
 - **Preventivo, non fattura**: niente contenuto obbligatorio per legge né invio allo SdI, quindi un PDF basta. La pagina lo ricorda sotto l'intestazione. Una fattura vera richiederebbe l'XML FatturaPA (scelta dell'utente: non la facciamo).
@@ -147,11 +155,11 @@ Cosa produce il convertitore: front matter YAML (titolo, sorgente, pagine), tito
 client/src
   components/
     common/             componenti comuni riusabili (Button, TextField, Panel, Logo, Navbar, ToolsMenu, Footer, ...)
-    features/           componenti composti, divisi per area (home, qr, short-url, pdf-markdown, excel-csv, speech-to-text, chart-generator, json-diff, image-converter, pdf-merge, password-generator, quote)
+    features/           componenti composti, divisi per area (home, qr, short-url, pdf-markdown, excel-csv, speech-to-text, chart-generator, json-diff, image-converter, pdf-merge, password-generator, quote, meta-tags)
     layouts/            layout delle pagine (RootLayout con navbar e footer)
   config/               utilities.ts (unica fonte delle utility per navbar, home e router; `enabled: false` le nasconde) e site.ts (nome app, link autore)
   hooks/                hook React (useShortUrls, useQrCode, useTheme, ...)
-  lib/                  funzioni pure di supporto (validazione, http, download, cn, pdf-markdown/, excel-csv/, speech-to-text/, chart-generator/, json-diff/, image-converter/, pdf-merge/, password-generator/, quote/)
+  lib/                  funzioni pure di supporto (validazione, http, download, cn, pdf-markdown/, excel-csv/, speech-to-text/, chart-generator/, json-diff/, image-converter/, pdf-merge/, password-generator/, quote/, meta-tags/)
   models/               interfacce e tipi condivisi
   pages/                una pagina per route, caricata in lazy (la 404 è fuori dal layout)
   services/             accesso a API e librerie esterne (shortUrlApi, qrGenerator, pdf/, excel/, speechRecognition, chart/, image/, pdf-merge/, quote/)

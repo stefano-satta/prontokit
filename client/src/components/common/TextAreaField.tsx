@@ -6,21 +6,27 @@ interface TextAreaFieldProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaEle
   hint?: ReactNode;
   error?: string | null;
   optional?: boolean;
+  /** Contenuto sulla riga dell'etichetta, a destra (es. un contatore); letto anche dagli screen reader */
+  aside?: ReactNode;
 }
 
 /** Testo su più righe con etichetta, suggerimento ed errore, con lo stesso aspetto di `TextField`. */
-export function TextAreaField({ label, hint, error, optional, className, rows = 3, ...props }: TextAreaFieldProps) {
+export function TextAreaField({ label, hint, error, optional, aside, className, rows = 3, ...props }: TextAreaFieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
-  const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined;
+  const asideId = `${id}-aside`;
+  const describedBy = [aside && asideId, hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-sm font-medium text-fg">
-        {label}
-        {optional && <span className="ml-1.5 font-normal text-fg-muted">(facoltativo)</span>}
-      </label>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <label htmlFor={id} className="text-sm font-medium text-fg">
+          {label}
+          {optional && <span className="ml-1.5 font-normal text-fg-muted">(facoltativo)</span>}
+        </label>
+        {aside && <span id={asideId}>{aside}</span>}
+      </div>
       <textarea
         id={id}
         rows={rows}
