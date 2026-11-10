@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { validatePdf } from '../lib/validatePdf';
 import type { PdfConversionState } from '../models/pdf';
 import { PdfPasswordError } from '../services/pdf/pdfTextExtractor';
 import { convertPdfToMarkdown, PdfNoTextError } from '../services/pdf/pdfToMarkdown';
+import { useLatestTask } from './useLatestTask';
 
 const errorState = (fileName: string, error: unknown): PdfConversionState => {
   if (error instanceof PdfNoTextError) {
@@ -28,32 +29,24 @@ const errorState = (fileName: string, error: unknown): PdfConversionState => {
 export const usePdfConversion = () => {
   const [state, setState] = useState<PdfConversionState>({ status: 'idle' });
   const fileRef = useRef<File | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const task = useLatestTask();
 
-  const cancelRunning = () => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-  };
-
-  const run = useCallback(async (file: File, password?: string) => {
-    cancelRunning();
-    const controller = new AbortController();
-    abortRef.current = controller;
+  const run = useCallback(async (file: File, signal: AbortSignal, password?: string) => {
     setState({ status: 'converting', fileName: file.name, progress: null });
 
     try {
       const result = await convertPdfToMarkdown(file, {
         password,
-        signal: controller.signal,
+        signal,
         onProgress: (progress) => {
-          if (!controller.signal.aborted) setState({ status: 'converting', fileName: file.name, progress });
+          if (!signal.aborted) setState({ status: 'converting', fileName: file.name, progress });
         },
       });
-      if (controller.signal.aborted) return;
+      if (signal.aborted) return;
       fileRef.current = null;
       setState({ status: 'done', fileName: file.name, result });
     } catch (error) {
-      if (controller.signal.aborted) return;
+      if (signal.aborted) return;
       if (error instanceof PdfPasswordError) {
         setState({ status: 'password', fileName: file.name, incorrect: error.incorrect });
         return;
@@ -65,33 +58,33 @@ export const usePdfConversion = () => {
 
   const convert = useCallback(
     async (file: File) => {
-      cancelRunning();
+      // Il segnale nasce prima della validazione: un file scelto subito dopo scarta questo, anche se finisce prima
+      const signal = task.start();
       const validation = await validatePdf(file);
+      if (signal.aborted) return;
       if (!validation.ok) {
         fileRef.current = null;
         setState({ status: 'error', fileName: file.name, code: validation.code, message: validation.message });
         return;
       }
       fileRef.current = file;
-      await run(file);
+      await run(file, signal);
     },
-    [run],
+    [run, task],
   );
 
   const submitPassword = useCallback(
     (password: string) => {
-      if (fileRef.current) void run(fileRef.current, password);
+      if (fileRef.current) void run(fileRef.current, task.start(), password);
     },
-    [run],
+    [run, task],
   );
 
   const reset = useCallback(() => {
-    cancelRunning();
+    task.cancel();
     fileRef.current = null;
     setState({ status: 'idle' });
-  }, []);
-
-  useEffect(() => cancelRunning, []);
+  }, [task]);
 
   return { state, convert, submitPassword, reset };
 };

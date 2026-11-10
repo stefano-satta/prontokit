@@ -1,16 +1,12 @@
 import { SITE } from '../../config/site';
 import type { PdfRejectReason } from '../../models/pdfMerge';
+import { quoteList } from '../fileSelection';
 import { formatBytes } from '../formatBytes';
 import { MAX_PDF_BYTES } from '../validatePdf';
 
 export const MAX_PDFS = 5;
 export const MIN_PDFS = 2;
 export const PDF_ACCEPT = '.pdf,application/pdf';
-
-const quoteList = (names: readonly string[]) => {
-  const quoted = names.map((name) => `“${name}”`);
-  return quoted.length > 1 ? `${quoted.slice(0, -1).join(', ')} e ${quoted.at(-1)}` : (quoted[0] ?? '');
-};
 
 /** Quanti PDF nuovi entrano ancora nella selezione, rispettando il limite. */
 export const freeSlots = (selected: number): number => Math.max(0, MAX_PDFS - selected);

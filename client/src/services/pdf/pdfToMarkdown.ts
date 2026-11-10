@@ -1,5 +1,5 @@
 import { buildMarkdown, hasExtractableText } from '../../lib/pdf-markdown/buildMarkdown';
-import { toMarkdownFilename } from '../../lib/fileName';
+import { toMarkdownFilename } from '../../lib/pdf-markdown/markdownFilename';
 import type { MarkdownResult } from '../../models/pdf';
 import { extractPdfText, type ExtractOptions } from './pdfTextExtractor';
 

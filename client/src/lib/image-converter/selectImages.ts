@@ -1,12 +1,8 @@
 import type { ImageInputFormat, ImageOutputFormat } from '../../models/imageConverter';
+import { quoteList } from '../fileSelection';
 import { formatBytes } from '../formatBytes';
 import type { ImageRejectReason } from '../validateImage';
 import { FORMAT_INFO, MAX_IMAGE_BYTES, MAX_IMAGES } from './imageFormats';
-
-const quoteList = (names: readonly string[]) => {
-  const quoted = names.map((name) => `“${name}”`);
-  return quoted.length > 1 ? `${quoted.slice(0, -1).join(', ')} e ${quoted.at(-1)}` : (quoted[0] ?? '');
-};
 
 /** Quante immagini nuove entrano ancora nella selezione, rispettando il limite. */
 export const freeSlots = (selected: number): number => Math.max(0, MAX_IMAGES - selected);

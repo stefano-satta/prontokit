@@ -144,3 +144,10 @@ const ALL_UTILITIES: readonly Utility[] = [
 
 /** Utility attive: le disattivate non compaiono in navbar e home e non hanno una route. */
 export const UTILITIES: readonly Utility[] = ALL_UTILITIES.filter(({ enabled = true }) => enabled);
+
+/** Voce di una utility, anche disattivata: le pagine leggono da qui titolo e icona, senza ripeterli. */
+export const findUtility = (id: string): Utility => {
+  const utility = ALL_UTILITIES.find((item) => item.id === id);
+  if (!utility) throw new Error(`Utility sconosciuta: ${id}`);
+  return utility;
+};

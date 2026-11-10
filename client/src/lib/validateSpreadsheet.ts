@@ -1,3 +1,4 @@
+import { readFileHead, startsWithBytes } from './fileSignature';
 import { formatBytes } from './formatBytes';
 
 export const MAX_SPREADSHEET_BYTES = 25 * 1024 * 1024;
@@ -23,8 +24,6 @@ export type SpreadsheetValidation =
   | { ok: true; container: SpreadsheetContainer }
   | { ok: false; code: 'invalid-file' | 'too-large'; message: string };
 
-const startsWith = (bytes: Uint8Array, signature: number[]) => signature.every((byte, i) => bytes[i] === byte);
-
 /** Controlla dimensione e firma reale: estensione e MIME type si possono falsificare. */
 export async function validateSpreadsheet(file: File): Promise<SpreadsheetValidation> {
   if (file.size === 0) return { ok: false, code: 'invalid-file', message: 'Il file è vuoto: scegline uno che contenga dati.' };
@@ -35,9 +34,9 @@ export async function validateSpreadsheet(file: File): Promise<SpreadsheetValida
       message: `Il file pesa ${formatBytes(file.size)}: il limite è ${formatBytes(MAX_SPREADSHEET_BYTES)}. Dividilo in file più piccoli.`,
     };
   }
-  const head = new Uint8Array(await file.slice(0, CFB_SIGNATURE.length).arrayBuffer());
-  if (startsWith(head, ZIP_SIGNATURE)) return { ok: true, container: 'zip' };
-  if (startsWith(head, CFB_SIGNATURE)) return { ok: true, container: 'cfb' };
+  const head = await readFileHead(file, CFB_SIGNATURE.length);
+  if (startsWithBytes(head, ZIP_SIGNATURE)) return { ok: true, container: 'zip' };
+  if (startsWithBytes(head, CFB_SIGNATURE)) return { ok: true, container: 'cfb' };
   return {
     ok: false,
     code: 'invalid-file',

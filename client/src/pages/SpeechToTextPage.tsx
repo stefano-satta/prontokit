@@ -1,15 +1,14 @@
-import { Download, Mic } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Button } from '../components/common/Button';
 import { CopyButton } from '../components/common/CopyButton';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { Panel } from '../components/common/Panel';
 import { LanguageSelect } from '../components/features/speech-to-text/LanguageSelect';
 import { PunctuationBar } from '../components/features/speech-to-text/PunctuationBar';
 import { RecordButton } from '../components/features/speech-to-text/RecordButton';
 import { SpeechPrivacyNote } from '../components/features/speech-to-text/SpeechPrivacyNote';
 import { TranscriptEditor } from '../components/features/speech-to-text/TranscriptEditor';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { downloadText } from '../lib/downloadFile';
 import { SPEECH_ERROR_MESSAGES, UNSUPPORTED_MESSAGE } from '../lib/speech-to-text/errorMessages';
@@ -26,7 +25,6 @@ const STATUS_TEXT: Partial<Record<SpeechStatus, string>> = {
 };
 
 export default function SpeechToTextPage() {
-  useDocumentTitle('Trascrizione vocale');
   const [languageId, setLanguageId] = useState<SpeechLanguageId>(DEFAULT_SPEECH_LANGUAGE);
   const [text, setText] = useState('');
 
@@ -64,12 +62,12 @@ export default function SpeechToTextPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader
-        icon={Mic}
-        title="Trascrizione vocale"
+      <UtilityPageHeader
+        utilityId="speech-to-text"
         description="Premi il pulsante e parla: il testo compare mentre detti, in italiano, inglese, francese o spagnolo. Poi aggiungi la punteggiatura con i tasti, correggi il risultato e scaricalo in .txt."
-      />
-      <SpeechPrivacyNote />
+      >
+        <SpeechPrivacyNote />
+      </UtilityPageHeader>
       <Panel className="flex flex-col gap-6 p-6 sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <LanguageSelect value={languageId} onChange={setLanguageId} disabled={busy || status === 'unsupported'} />

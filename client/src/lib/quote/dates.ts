@@ -1,3 +1,5 @@
+import { localIsoDate } from '../localDate';
+
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 /** Data ISO valida (`2026-10-21`), senza correzioni automatiche come il 31 febbraio → 3 marzo. */
@@ -9,8 +11,7 @@ export const isIsoDate = (value: string): boolean => {
 };
 
 /** Data di oggi nel fuso dell'utente, in formato ISO. */
-export const todayIso = (now = new Date()): string =>
-  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+export const todayIso = (now = new Date()): string => localIsoDate(now);
 
 /** Somma giorni in UTC, così l'ora legale non sposta la data. */
 export const addDays = (iso: string, days: number): string => {

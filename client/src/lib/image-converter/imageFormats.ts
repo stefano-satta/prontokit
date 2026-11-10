@@ -1,4 +1,5 @@
 import type { DetectedImage, ImageInputFormat, ImageOutputFormat } from '../../models/imageConverter';
+import { startsWithBytes } from '../fileSignature';
 
 export const MAX_IMAGES = 5;
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
@@ -26,15 +27,14 @@ export const OUTPUT_FORMATS: readonly ImageOutputFormat[] = ['png', 'jpeg', 'web
 export const IMAGE_ACCEPT = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.bmp', 'image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp'].join(',');
 
 const ascii = (bytes: Uint8Array, start: number, length: number) => String.fromCharCode(...bytes.subarray(start, start + length));
-const startsWith = (bytes: Uint8Array, signature: number[]) => signature.every((byte, i) => bytes[i] === byte);
 
 /** Byte iniziali necessari a `detectImageFormat` (l'intestazione `ftyp` di AVIF elenca più brand). */
 export const SIGNATURE_BYTES = 64;
 
 /** Riconosce il formato dalla firma reale: estensione e MIME type si possono falsificare. */
 export function detectImageFormat(bytes: Uint8Array): DetectedImage | null {
-  if (startsWith(bytes, [0xff, 0xd8, 0xff])) return { format: 'jpeg', animated: false };
-  if (startsWith(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return { format: 'png', animated: false };
+  if (startsWithBytes(bytes, [0xff, 0xd8, 0xff])) return { format: 'jpeg', animated: false };
+  if (startsWithBytes(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return { format: 'png', animated: false };
   if (ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 4) === 'WEBP') {
     // Formato esteso VP8X: il bit 1 dei flag segnala l'animazione
     const animated = ascii(bytes, 12, 4) === 'VP8X' && ((bytes[20] ?? 0) & 0x02) !== 0;

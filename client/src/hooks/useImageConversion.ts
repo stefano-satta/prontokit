@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { partitionFiles } from '../lib/fileSelection';
 import { convertedFilenames } from '../lib/image-converter/imageFileNames';
 import { allAlreadyInFormat, freeSlots, rejectionNotices, sameFormatMessage } from '../lib/image-converter/selectImages';
-import { validateImage, type ImageRejectReason } from '../lib/validateImage';
+import { validateImage } from '../lib/validateImage';
 import type { ImageConversionPhase, ImageOutputFormat, ImageResult, SelectedImage } from '../models/imageConverter';
 import { ImageConversionError, conversionErrorMessage, convertImage } from '../services/image/convertImage';
 
@@ -41,18 +42,13 @@ export const useImageConversion = () => {
 
   const addFiles = useCallback(async (files: File[]) => {
     const checks = await Promise.all(files.map(async (file) => ({ file, check: await validateImage(file) })));
-    const rejected: { name: string; reason: ImageRejectReason }[] = [];
-    const accepted: SelectedImage[] = [];
-    const overLimit: string[] = [];
-    const slots = freeSlots(imagesRef.current.length);
-
-    for (const { file, check } of checks) {
-      if (!check.ok) rejected.push({ name: file.name, reason: check.reason });
-      else if (accepted.length >= slots) overLimit.push(file.name);
-      else {
-        accepted.push({ id: `img-${nextId++}`, file, format: check.format, animated: check.animated, previewUrl: createUrl(file) });
-      }
-    }
+    const { accepted, rejected, overLimit } = partitionFiles(checks, freeSlots(imagesRef.current.length), (file, check) => ({
+      id: `img-${nextId++}`,
+      file,
+      format: check.format,
+      animated: check.animated,
+      previewUrl: createUrl(file),
+    }));
     setNotices(rejectionNotices(rejected, overLimit));
     if (accepted.length) updateImages([...imagesRef.current, ...accepted]);
   }, []);

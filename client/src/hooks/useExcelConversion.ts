@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { validateSpreadsheet } from '../lib/validateSpreadsheet';
 import type { ExcelConversionErrorCode, ExcelConversionState } from '../models/excel';
 import { ExcelConversionError, convertSpreadsheet } from '../services/excel/excelWorkerClient';
+import { useLatestTask } from './useLatestTask';
 
 const MESSAGES: Record<Exclude<ExcelConversionErrorCode, 'invalid-file' | 'too-large'>, string> = {
   password:
@@ -24,20 +25,12 @@ const errorState = (fileName: string, error: unknown): ExcelConversionState => {
  */
 export const useExcelConversion = () => {
   const [state, setState] = useState<ExcelConversionState>({ status: 'idle' });
-  const abortRef = useRef<AbortController | null>(null);
-
-  const cancelRunning = () => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-  };
+  const task = useLatestTask();
 
   const convert = useCallback(async (file: File) => {
-    cancelRunning();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
+    const signal = task.start();
     const validation = await validateSpreadsheet(file);
-    if (controller.signal.aborted) return;
+    if (signal.aborted) return;
     if (!validation.ok) {
       setState({ status: 'error', fileName: file.name, code: validation.code, message: validation.message });
       return;
@@ -45,19 +38,17 @@ export const useExcelConversion = () => {
 
     setState({ status: 'converting', fileName: file.name });
     try {
-      const workbook = await convertSpreadsheet(file, validation.container, controller.signal);
-      if (!controller.signal.aborted) setState({ status: 'ready', fileName: file.name, workbook });
+      const workbook = await convertSpreadsheet(file, validation.container, signal);
+      if (!signal.aborted) setState({ status: 'ready', fileName: file.name, workbook });
     } catch (error) {
-      if (!controller.signal.aborted) setState(errorState(file.name, error));
+      if (!signal.aborted) setState(errorState(file.name, error));
     }
-  }, []);
+  }, [task]);
 
   const reset = useCallback(() => {
-    cancelRunning();
+    task.cancel();
     setState({ status: 'idle' });
-  }, []);
-
-  useEffect(() => cancelRunning, []);
+  }, [task]);
 
   return { state, convert, reset };
 };

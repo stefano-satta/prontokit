@@ -1,3 +1,5 @@
+import { cn } from '../../../lib/cn';
+
 /** Due mini riquadri con righe evidenziate, per il box della home. */
 const LINES = [
   { left: 'w-14', right: 'w-14' },
@@ -17,11 +19,11 @@ export function JsonDiffPreview() {
           {LINES.map((line, index) => (
             <span
               key={index}
-              className={`flex h-3 items-center gap-1.5 rounded-sm px-1 ${line.changed ? 'bg-success-soft' : ''}`}
+              className={cn('flex h-3 items-center gap-1.5 rounded-sm px-1', line.changed && 'bg-success-soft')}
             >
               <span className="text-[8px] leading-none text-fg-muted">{index + 1}</span>
               <span
-                className={`h-1.5 rounded-full ${line[side]} ${line.changed ? 'bg-success' : 'bg-border-strong'}`}
+                className={cn('h-1.5 rounded-full', line[side], line.changed ? 'bg-success' : 'bg-border-strong')}
               />
             </span>
           ))}

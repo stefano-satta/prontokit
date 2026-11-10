@@ -1,21 +1,21 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
-type Size = 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonSize = 'md' | 'lg';
 
-const VARIANTS: Record<Variant, string> = {
+const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-primary-fg not-disabled:hover:bg-primary-hover shadow-[0_1px_2px_rgb(15_23_42/0.12)]',
   secondary: 'bg-surface text-fg border border-border-strong not-disabled:hover:bg-surface-muted',
   ghost: 'text-fg-muted not-disabled:hover:text-fg not-disabled:hover:bg-surface-muted',
 };
 
-const SIZES: Record<Size, string> = {
+const SIZES: Record<ButtonSize, string> = {
   md: 'h-10 px-4 text-sm gap-2',
   lg: 'h-12 px-5 text-[15px] gap-2',
 };
 
-export const buttonClasses = (variant: Variant = 'primary', size: Size = 'md', className?: string) =>
+export const buttonClasses = (variant: ButtonVariant = 'primary', size: ButtonSize = 'md', className?: string) =>
   cn(
     'inline-flex shrink-0 items-center justify-center rounded-lg font-medium whitespace-nowrap',
     'transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50',
@@ -25,8 +25,8 @@ export const buttonClasses = (variant: Variant = 'primary', size: Size = 'md', c
   );
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   icon?: ReactNode;
 }
 

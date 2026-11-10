@@ -1,14 +1,13 @@
-import { ImageUp, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { FileDropzone } from '../components/common/FileDropzone';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { Panel } from '../components/common/Panel';
 import { PrivacyNote } from '../components/common/PrivacyNote';
 import { SegmentedControl } from '../components/common/SegmentedControl';
 import { Spinner } from '../components/common/Spinner';
 import { ImageConversionResult } from '../components/features/image-converter/ImageConversionResult';
 import { SelectedImageList } from '../components/features/image-converter/SelectedImageList';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useImageConversion } from '../hooks/useImageConversion';
 import { formatBytes } from '../lib/formatBytes';
 import { FORMAT_INFO, IMAGE_ACCEPT, MAX_IMAGE_BYTES, MAX_IMAGES, OUTPUT_FORMATS } from '../lib/image-converter/imageFormats';
@@ -16,22 +15,21 @@ import { FORMAT_INFO, IMAGE_ACCEPT, MAX_IMAGE_BYTES, MAX_IMAGES, OUTPUT_FORMATS 
 const TARGET_OPTIONS = OUTPUT_FORMATS.map((format) => ({ value: format, label: FORMAT_INFO[format].label }));
 
 export default function ImageConverterPage() {
-  useDocumentTitle('Convertitore di immagini');
   const { images, target, setTarget, phase, notices, blockedMessage, addFiles, removeImage, convert, reset } = useImageConversion();
   const converting = phase.status === 'converting';
   const full = images.length >= MAX_IMAGES;
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader
-        icon={ImageUp}
-        title="Convertitore di immagini"
+      <UtilityPageHeader
+        utilityId="image-converter"
         description="Trascina fino a 5 immagini JPG, PNG, WebP, AVIF o BMP, scegli il formato e scaricale convertite in PNG, JPG o WebP."
-      />
-      <PrivacyNote
-        title="Le immagini non lasciano il tuo dispositivo."
-        description="La conversione avviene interamente nel browser: niente upload, niente copie sui server. I metadati, come la posizione GPS, non vengono copiati."
-      />
+      >
+        <PrivacyNote
+          title="Le immagini non lasciano il tuo dispositivo."
+          description="La conversione avviene interamente nel browser: niente upload, niente copie sui server. I metadati, come la posizione GPS, non vengono copiati."
+        />
+      </UtilityPageHeader>
       {phase.status === 'done' ? (
         <ImageConversionResult target={phase.target} results={phase.results} onReset={reset} />
       ) : (

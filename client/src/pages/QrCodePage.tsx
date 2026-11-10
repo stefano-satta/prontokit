@@ -1,12 +1,11 @@
-import { Download, FileCode2, QrCode } from 'lucide-react';
+import { Download, FileCode2 } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { Button } from '../components/common/Button';
 import { Panel } from '../components/common/Panel';
 import { TextField } from '../components/common/TextField';
 import { QrViewfinder } from '../components/features/qr/QrViewfinder';
 import { useQrCode } from '../hooks/useQrCode';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { downloadFile, downloadText } from '../lib/downloadFile';
 import { validateUrl } from '../lib/validateUrl';
 
@@ -16,7 +15,6 @@ const filenameFor = (url: string) => {
 };
 
 export default function QrCodePage() {
-  useDocumentTitle('Generatore di QR code');
   const [input, setInput] = useState('');
   const [touched, setTouched] = useState(false);
 
@@ -29,9 +27,8 @@ export default function QrCodePage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader
-        icon={QrCode}
-        title="Generatore di QR code"
+      <UtilityPageHeader
+        utilityId="qr-code"
         description="Incolla l'indirizzo di un sito: il QR code si aggiorna mentre scrivi. Scaricalo in PNG per il web o in SVG per la stampa."
       />
 

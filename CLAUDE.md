@@ -33,13 +33,17 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
 
 ## Struttura client (`client/src`)
 - `pages/`: una pagina per route con `export default` (lazy). `NotFoundPage` è fuori da `RootLayout` (pagina intera).
-- `components/common/`: UI riusabile e generica (Button, TextField, Panel, Dialog, Navbar, ToolsMenu, Footer, FileDropzone, PrivacyNote, ...).
+  Le route `lazy` non sospendono il render (niente `<Suspense>`): durante il cambio pagina `RootLayout` mostra una barra
+  di caricamento (`useNavigation`), al primo caricamento il router mostra `RootHydrateFallback`.
+  Le pagine delle utility aprono con `UtilityPageHeader utilityId="<id>"`: titolo, icona e titolo della scheda vengono da `UTILITIES`,
+  la `PrivacyNote` va come figlio (stessa distanza in ogni pagina).
+- `components/common/`: UI riusabile e generica (Button, TextField, Panel, Dialog, Navbar, ToolsMenu, Footer, FileDropzone, PrivacyNote, UtilityPageHeader, ...).
   Navbar "a isola": pillola di vetro centrata (`max-w-2xl`, token `glass*` e `shadow-island`) con Logo, Home (etichetta testuale),
   "Tools" (disclosure con l'elenco di `UTILITIES`: pannello di vetro allineato a destra su desktop, largo quanto l'isola
   con velo su mobile; si chiude con Esc, click fuori o cambio pagina), cambio tema. Il vetro è un livello separato:
   un `backdrop-filter` sull'antenato impedirebbe la sfocatura della tendina.
-- `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`, `quote`, `meta-tags`).
-- `components/layouts/`: `RootLayout` (skip link, Navbar, `<main>`, Footer). Il taglio orizzontale (`overflow-x-clip`, per lo sfondo
+- `components/features/<area>/`: componenti di una singola utility (`home`, `qr`, `short-url`, `pdf-markdown`, `excel-csv`, `speech-to-text`, `chart-generator`, `json-diff`, `image-converter`, `pdf-merge`, `password-generator`, `quote`, `meta-tags`, `legal` con `LegalDocument` per le pagine legali).
+- `components/layouts/`: `RootLayout` (skip link, barra di navigazione in corso, Navbar, `<main>`, Footer). Il taglio orizzontale (`overflow-x-clip`, per lo sfondo
   della home largo 1440px) sta sul contenitore di `<main>` e Footer, mai su un antenato della navbar sticky: in WebKit (Safari e Chrome
   su iOS) uno sticky dentro un antenato con overflow non è mosso dal compositor e la navbar sobbalza durante lo scroll.
 - `config/utilities.ts`: **unica fonte** delle utility; navbar, card della home e router leggono da qui.
@@ -47,8 +51,9 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   `config/footerLinks.ts`: menu del footer (About `/about`, Privacy `/privacy`, Termini `/termini`), fuori dalla navbar; il router
   registra solo le voci con `loadPage`. Se torna lo short URL, i loro path vanno tra i codici riservati (`RESERVED_CODES` del server, `aliasRules.ts`).
   Una voce di `UTILITIES` con `enabled: false` resta nel codice ma non compare in navbar e home e non ha route (oggi: `short-url`).
-- `hooks/`: tutti gli hook React. `models/`: tutti i tipi e le interfacce condivisi.
-- `lib/`: funzioni pure senza React (validazioni, `cn`, http, download, `fileName` per nomi sicuri,
+- `hooks/`: tutti gli hook React (`useLatestTask` tiene valido solo l'ultimo lavoro avviato, con `AbortSignal`). `models/`: tutti i tipi e le interfacce condivisi.
+- `lib/`: funzioni pure senza React (validazioni, `cn`, http, download, `fileName` per nomi sicuri, con data e ora (`timestampedFilename`) e univoci negli ZIP (`uniqueFilenames`),
+  `fileSignature` per leggere e confrontare le firme dei file, `fileSelection` per dividere i file scelti (accettati, scartati, oltre il limite), `localDate`,
   `pdf-markdown/` e `excel-csv/` per la logica di conversione, `speech-to-text/` per lingue, unione dei frammenti e inserimento della punteggiatura,
   `chart-generator/` per parsing dei dati, palette, configurazione Chart.js e SVG della tabella, `json-diff/` per analisi, formattazione e diff riga per riga, `image-converter/` per firme dei formati, nomi dei file e avvisi di selezione, `pdf-merge/` per avvisi, ordinamento, nome del file e ricerca di `/Encrypt`, `password-generator/` per gruppi di caratteri, generazione e forza, `quote/` per calcoli in `BigInt`, validazione, date, IBAN, formattazione e testo stampabile nel PDF, `meta-tags/` per limiti di lunghezza, validazione e generazione dei tag).
 - `services/`: accesso ad API e librerie esterne (`shortUrlApi`, `qrGenerator`, `pdf/`, `excel/`: SheetJS nel worker
@@ -73,7 +78,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
   - tutto usabile da tastiera, con focus visibile;
   - contrasto sufficiente in entrambi i temi;
   - icone decorative con `aria-hidden`;
-  - `useDocumentTitle` su ogni pagina.
+  - `useDocumentTitle` su ogni pagina (nelle utility lo chiama `UtilityPageHeader`).
 - Mobile-first: verifica a 375px senza scroll orizzontale (anche gli e2e girano su mobile).
 - Icone solo da lucide-react.
 - Flusso del prodotto: input → risultato → copia o scarica, senza passaggi superflui.
@@ -144,7 +149,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
     Se cambia lo script, aggiorna l'hash dall'errore CSP in console. Mai `'unsafe-inline'` negli script. La Privacy descrive il badge.
   - Una nuova dipendenza esterna (API, font, CDN) richiede di aggiornare la CSP e di valutarne l'impatto sulla privacy.
 - **Nuova utility:**
-  - crea `pages/XPage.tsx`, i componenti in `components/features/<x>/` e una voce in `UTILITIES`;
+  - crea `pages/XPage.tsx` (che apre con `UtilityPageHeader`), i componenti in `components/features/<x>/` e una voce in `UTILITIES`;
   - non toccare a mano navbar, home o router;
   - la `description` in `UTILITIES` (box della home) dice solo cosa fa l'utility: niente frasi sulla privacy
     («Tutto avviene nel browser…», «non lascia il dispositivo»), che stanno già nella `PrivacyNote` della pagina (scelta dell'utente).

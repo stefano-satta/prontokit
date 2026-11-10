@@ -1,7 +1,8 @@
 import { Eraser, Minimize2, Undo2, WandSparkles } from 'lucide-react';
+import type { JsonTransform } from '../../../lib/json-diff/transformJson';
 import { Button } from '../../common/Button';
 
-export type JsonAction = 'beautify' | 'minify' | 'clear';
+export type JsonAction = JsonTransform | 'clear';
 
 interface JsonToolbarProps {
   /** Formatta e Minifica lavorano sul JSON di destra: senza testo lì non servono */

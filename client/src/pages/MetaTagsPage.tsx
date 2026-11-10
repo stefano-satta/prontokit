@@ -1,6 +1,6 @@
-import { RotateCcw, Tags } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { PrivacyNote } from '../components/common/PrivacyNote';
 import { SegmentedControl, type SegmentedOption } from '../components/common/SegmentedControl';
 import { TextAreaField } from '../components/common/TextAreaField';
@@ -8,7 +8,6 @@ import { TextField } from '../components/common/TextField';
 import { CharacterCounter } from '../components/features/meta-tags/CharacterCounter';
 import { GeneratedTags } from '../components/features/meta-tags/GeneratedTags';
 import { MetaTagsSection } from '../components/features/meta-tags/MetaTagsSection';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMetaTags } from '../hooks/useMetaTags';
 import { LENGTH_LIMITS } from '../lib/meta-tags/lengthLimits';
 import type { OgType, TwitterCardType } from '../models/metaTags';
@@ -24,24 +23,21 @@ const TWITTER_CARDS: readonly SegmentedOption<TwitterCardType>[] = [
 ];
 
 export default function MetaTagsPage() {
-  useDocumentTitle('Generatore di meta tag SEO');
   const { input, errors, html, isEmpty, setField, reset } = useMetaTags();
   const ogTitleFallback = input.title.trim() || 'Uguale al titolo della pagina';
   const ogDescriptionFallback = input.description.trim() || 'Uguale alla meta description';
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-4">
-        <PageHeader
-          icon={Tags}
-          title="Generatore di meta tag SEO"
-          description="Compila i dati della pagina: titolo, descrizione, Open Graph e card di X diventano tag HTML pronti da copiare nel <head>."
-        />
+      <UtilityPageHeader
+        utilityId="meta-tags"
+        description="Compila i dati della pagina: titolo, descrizione, Open Graph e card di X diventano tag HTML pronti da copiare nel <head>."
+      >
         <PrivacyNote
           title="I dati restano nel tuo dispositivo."
           description="I tag vengono composti nel browser: niente viene salvato né inviato."
         />
-      </div>
+      </UtilityPageHeader>
 
       <div className="flex flex-col gap-6">
         <div className="flex justify-end">

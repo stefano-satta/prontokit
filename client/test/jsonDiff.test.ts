@@ -4,6 +4,7 @@ import { compareJson, sameJsonData } from '../src/lib/json-diff/compareJson';
 import { jsonDiffFilename } from '../src/lib/json-diff/jsonDiffFilename';
 import { beautifyTokens, minifyTokens } from '../src/lib/json-diff/formatJson';
 import { diffLines } from '../src/lib/json-diff/lineDiff';
+import { transformJson } from '../src/lib/json-diff/transformJson';
 
 const tokensOf = (text: string) => {
   const result = analyzeJson(text);
@@ -162,5 +163,21 @@ describe('compareJson', () => {
 describe('jsonDiffFilename', () => {
   it('usa data e ora locali', () => {
     expect(jsonDiffFilename(new Date(2026, 9, 20, 9, 5))).toBe('json-2026-10-20-0905.json');
+  });
+});
+
+describe('transformJson', () => {
+  it('formatta un JSON valido', () => {
+    expect(transformJson('{"a":1}', 'beautify')).toEqual({ next: '{\n  "a": 1\n}', message: 'JSON di destra formattato con 2 spazi di rientro.' });
+  });
+
+  it('segnala quando il testo non cambia', () => {
+    expect(transformJson('{"a":1}', 'minify').message).toBe('Nessun cambiamento: il testo era già così.');
+  });
+
+  it('lascia invariato un JSON non valido e indica la riga', () => {
+    const result = transformJson('{\n"a":}', 'beautify');
+    expect(result.next).toBe('{\n"a":}');
+    expect(result.message).toContain('riga 2');
   });
 });

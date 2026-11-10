@@ -175,7 +175,7 @@ Principi applicati:
 
 ### Aggiungere una nuova utility
 
-1. Crea `client/src/pages/NuovaUtilityPage.tsx` (export default) e i suoi componenti in `components/features/<utility>/`.
+1. Crea `client/src/pages/NuovaUtilityPage.tsx` (export default), che apre con `<UtilityPageHeader utilityId="<id>" description="...">`, e i suoi componenti in `components/features/<utility>/`.
 2. Aggiungi una voce a `UTILITIES` in `client/src/config/utilities.ts`.
 
 Navbar, box della home e route si aggiornano da soli.

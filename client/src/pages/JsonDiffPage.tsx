@@ -1,22 +1,21 @@
-import { CircleAlert, CircleCheck, Download, FileDiff } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { Button } from '../components/common/Button';
 import { CopyButton } from '../components/common/CopyButton';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { Panel } from '../components/common/Panel';
 import { PrivacyNote } from '../components/common/PrivacyNote';
 import { DiffSummary, SIDE_LABELS } from '../components/features/json-diff/DiffSummary';
 import { JsonEditor } from '../components/features/json-diff/JsonEditor';
+import { SideBadge } from '../components/features/json-diff/SideBadge';
 import { JsonToolbar, type JsonAction } from '../components/features/json-diff/JsonToolbar';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useJsonDiff } from '../hooks/useJsonDiff';
 import { downloadText } from '../lib/downloadFile';
-import { analyzeJson } from '../lib/json-diff/analyzeJson';
 import { scrollEditorToLine } from '../lib/json-diff/editorScroll';
-import { beautifyTokens, minifyTokens } from '../lib/json-diff/formatJson';
 import { jsonDiffFilename } from '../lib/json-diff/jsonDiffFilename';
+import { transformJson } from '../lib/json-diff/transformJson';
 import { splitLines } from '../lib/json-diff/lineDiff';
-import type { JsonSide, SideState } from '../models/jsonDiff';
+import type { JsonSide } from '../models/jsonDiff';
 
 type Texts = Record<JsonSide, string>;
 
@@ -47,48 +46,13 @@ const EXAMPLE: Texts = {
 
 const SIDES: JsonSide[] = ['left', 'right'];
 
-const DONE_MESSAGES: Record<'beautify' | 'minify', string> = {
-  beautify: 'JSON di destra formattato con 2 spazi di rientro.',
-  minify: 'JSON di destra minificato su una riga.',
-};
-
 interface Notice {
   message: string;
   /** Testi da ripristinare con "Annulla" */
   previous: Texts | null;
 }
 
-/** Formatta o Minifica agiscono solo sul JSON di destra, quello da correggere e scaricare. */
-const transformRight = (text: string, action: 'beautify' | 'minify'): { next: string; message: string } => {
-  const analysis = analyzeJson(text);
-  if (!analysis.ok) {
-    return { next: text, message: `Correggi prima l’errore alla riga ${analysis.error.line}: un JSON non valido non si può riscrivere.` };
-  }
-  const next = action === 'beautify' ? beautifyTokens(analysis.tokens) : minifyTokens(analysis.tokens);
-  return { next, message: next === text ? 'Nessun cambiamento: il testo era già così.' : DONE_MESSAGES[action] };
-};
-
-function SideBadge({ side }: { side: SideState }) {
-  const base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold';
-  if (side.empty) return <span className={`${base} bg-surface-muted text-fg-muted`}>Vuoto</span>;
-  if (side.analysis?.ok) {
-    return (
-      <span className={`${base} bg-success-soft text-success`}>
-        <CircleCheck className="size-3.5" aria-hidden />
-        JSON valido
-      </span>
-    );
-  }
-  return (
-    <span className={`${base} bg-danger-soft text-danger`}>
-      <CircleAlert className="size-3.5" aria-hidden />
-      Errore alla riga {side.analysis?.error.line}
-    </span>
-  );
-}
-
 export default function JsonDiffPage() {
-  useDocumentTitle('Confronto JSON');
   const [texts, setTexts] = useState<Texts>(EMPTY);
   const [notice, setNotice] = useState<Notice | null>(null);
   const { comparison, pending } = useJsonDiff(texts.left, texts.right);
@@ -113,7 +77,8 @@ export default function JsonDiffPage() {
       setNotice({ message: 'Riquadri svuotati.', previous: texts });
       return;
     }
-    const { next, message } = transformRight(texts.right, action);
+    // Formatta e Minifica agiscono solo sul JSON di destra, quello da correggere e scaricare
+    const { next, message } = transformJson(texts.right, action);
     setTexts({ ...texts, right: next });
     setNotice({ message, previous: next === texts.right ? null : texts });
   };
@@ -178,15 +143,15 @@ export default function JsonDiffPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader
-        icon={FileDiff}
-        title="Confronto JSON"
+      <UtilityPageHeader
+        utilityId="json-diff"
         description="Incolla due JSON: vedi subito se sono uguali o quali righe cambiano, con gli errori di sintassi spiegati riga per riga. Formatta o minifica, poi scarica o copia il JSON corretto."
-      />
-      <PrivacyNote
-        title="I tuoi JSON non lasciano il dispositivo."
-        description="Il confronto avviene interamente nel browser: niente upload, niente copie sui server, niente cronologia."
-      />
+      >
+        <PrivacyNote
+          title="I tuoi JSON non lasciano il dispositivo."
+          description="Il confronto avviene interamente nel browser: niente upload, niente copie sui server, niente cronologia."
+        />
+      </UtilityPageHeader>
       <Panel className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
         <JsonToolbar transformDisabled={rightEmpty} clearDisabled={bothEmpty} onAction={runAction} notice={notice && { message: notice.message, canUndo: notice.previous !== null }} onUndo={undo} />
         <DiffSummary comparison={comparison} onExample={() => setTexts(EXAMPLE)} />

@@ -1,4 +1,4 @@
-import { baseNameOf, sanitizeFilePart } from '../fileName';
+import { baseNameOf, sanitizeFilePart, uniqueFilenames } from '../fileName';
 
 const SPREADSHEET_EXTENSION = /\.(xlsx|xlsm|xlsb|xls|ods)$/i;
 const FALLBACK_BASE = 'foglio-di-calcolo';
@@ -18,13 +18,5 @@ export const zipFilename = (originalName: string): string => `${spreadsheetBaseN
  * Nomi delle voci nello ZIP, uno per foglio: ripuliti (niente percorsi, quindi niente "zip slip")
  * e resi univoci senza distinguere maiuscole, perché Windows e macOS non le distinguono.
  */
-export const zipEntryNames = (sheetNames: readonly string[]): string[] => {
-  const used = new Set<string>();
-  return sheetNames.map((sheetName, index) => {
-    const base = sanitizeFilePart(sheetName, `foglio-${index + 1}`);
-    let candidate = base;
-    for (let n = 2; used.has(candidate.toLowerCase()); n++) candidate = `${base} (${n})`;
-    used.add(candidate.toLowerCase());
-    return `${candidate}.csv`;
-  });
-};
+export const zipEntryNames = (sheetNames: readonly string[]): string[] =>
+  uniqueFilenames(sheetNames.map((sheetName, index) => sanitizeFilePart(sheetName, `foglio-${index + 1}`)), 'csv');

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { partitionFiles } from '../lib/fileSelection';
 import { freeSlots, mergedPdfFilename, MIN_PDFS, moveItem, rejectionNotices } from '../lib/pdf-merge/selectPdfs';
 import { validatePdf } from '../lib/validatePdf';
-import type { PdfMergePhase, PdfRejectReason, SelectedPdf } from '../models/pdfMerge';
+import type { PdfMergePhase, SelectedPdf } from '../models/pdfMerge';
 import { inspectPdf, mergePdfs } from '../services/pdf-merge/pdfMerger';
 
 let nextId = 0;
@@ -54,15 +55,12 @@ export const usePdfMerge = () => {
     if (!isCurrent(run)) return;
     setChecking(false);
 
-    const rejected: { name: string; reason: PdfRejectReason }[] = [];
-    const accepted: SelectedPdf[] = [];
-    const overLimit: string[] = [];
-    const slots = freeSlots(pdfsRef.current.length);
-    for (const { file, check } of checks) {
-      if (!check.ok) rejected.push({ name: file.name, reason: check.reason });
-      else if (accepted.length >= slots) overLimit.push(file.name);
-      else accepted.push({ id: `pdf-${nextId++}`, file, pageCount: check.pageCount, document: check.document });
-    }
+    const { accepted, rejected, overLimit } = partitionFiles(checks, freeSlots(pdfsRef.current.length), (file, check) => ({
+      id: `pdf-${nextId++}`,
+      file,
+      pageCount: check.pageCount,
+      document: check.document,
+    }));
     setNotices(rejectionNotices(rejected, overLimit));
     if (accepted.length) updatePdfs([...pdfsRef.current, ...accepted]);
   }, []);

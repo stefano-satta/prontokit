@@ -1,13 +1,11 @@
-import { ChartColumn } from 'lucide-react';
 import { useCallback, useDeferredValue, useMemo, useState } from 'react';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { Panel } from '../components/common/Panel';
 import { TextField } from '../components/common/TextField';
 import { ChartDataField } from '../components/features/chart-generator/ChartDataField';
 import { ChartPreviewPanel } from '../components/features/chart-generator/ChartPreviewPanel';
 import { ChartTypeTabs, TAB_PANEL_ID, tabId } from '../components/features/chart-generator/ChartTypeTabs';
 import { DataTablePanel } from '../components/features/chart-generator/DataTablePanel';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { chartBlocker, parseChartData } from '../lib/chart-generator/parseChartData';
 import type { ChartSpec } from '../models/chart';
 
@@ -16,7 +14,6 @@ const SAMPLE_DATA = 'Gennaio;120\nFebbraio;98,5\nMarzo;143\nAprile;110\nMaggio;1
 type Settings = Omit<ChartSpec, 'title' | 'rows'>;
 
 export default function ChartGeneratorPage() {
-  useDocumentTitle('Generatore di grafici');
   const [title, setTitle] = useState('Vendite gennaio–maggio');
   const [data, setData] = useState(SAMPLE_DATA);
   const [settings, setSettings] = useState<Settings>({
@@ -36,9 +33,8 @@ export default function ChartGeneratorPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader
-        icon={ChartColumn}
-        title="Generatore di grafici"
+      <UtilityPageHeader
+        utilityId="chart-generator"
         description="Scegli il tipo di grafico, scrivi i dati e guarda l’anteprima aggiornarsi. Scarica grafico e tabella in PNG o copiali in SVG."
       />
 

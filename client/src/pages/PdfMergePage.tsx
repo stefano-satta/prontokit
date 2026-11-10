@@ -1,20 +1,18 @@
 import { Combine } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { FileDropzone } from '../components/common/FileDropzone';
-import { PageHeader } from '../components/common/PageHeader';
+import { UtilityPageHeader } from '../components/common/UtilityPageHeader';
 import { Panel } from '../components/common/Panel';
 import { PrivacyNote } from '../components/common/PrivacyNote';
 import { Spinner } from '../components/common/Spinner';
 import { PdfMergeResult } from '../components/features/pdf-merge/PdfMergeResult';
 import { SelectedPdfList } from '../components/features/pdf-merge/SelectedPdfList';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePdfMerge } from '../hooks/usePdfMerge';
 import { formatBytes } from '../lib/formatBytes';
 import { MAX_PDFS, MIN_PDFS, PDF_ACCEPT } from '../lib/pdf-merge/selectPdfs';
 import { MAX_PDF_BYTES } from '../lib/validatePdf';
 
 export default function PdfMergePage() {
-  useDocumentTitle('Unisci PDF');
   const { pdfs, phase, notices, checking, addFiles, removePdf, movePdf, merge, reset } = usePdfMerge();
   const merging = phase.status === 'merging';
   const busy = merging || checking;
@@ -22,15 +20,15 @@ export default function PdfMergePage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <PageHeader
-        icon={Combine}
-        title="Unisci PDF"
+      <UtilityPageHeader
+        utilityId="pdf-merge"
         description="Trascina fino a 5 PDF, mettili nell’ordine che preferisci e scarica un unico PDF con tutte le pagine."
-      />
-      <PrivacyNote
-        title="I documenti non lasciano il tuo dispositivo."
-        description="L’unione avviene interamente nel browser: niente upload, niente copie sui server, niente cronologia."
-      />
+      >
+        <PrivacyNote
+          title="I documenti non lasciano il tuo dispositivo."
+          description="L’unione avviene interamente nel browser: niente upload, niente copie sui server, niente cronologia."
+        />
+      </UtilityPageHeader>
       {phase.status === 'done' ? (
         <PdfMergeResult result={phase.result} onReset={reset} />
       ) : (

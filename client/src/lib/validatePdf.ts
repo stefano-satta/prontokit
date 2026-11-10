@@ -1,3 +1,4 @@
+import { readFileHead } from './fileSignature';
 import { formatBytes } from './formatBytes';
 
 export const MAX_PDF_BYTES = 25 * 1024 * 1024;
@@ -18,7 +19,7 @@ export async function validatePdf(file: File): Promise<PdfValidation> {
       message: `Il file pesa ${formatBytes(file.size)}: il limite è ${formatBytes(MAX_PDF_BYTES)}.`,
     };
   }
-  const head = new Uint8Array(await file.slice(0, SIGNATURE_WINDOW).arrayBuffer());
+  const head = await readFileHead(file, SIGNATURE_WINDOW);
   if (!new TextDecoder('latin1').decode(head).includes(PDF_SIGNATURE)) {
     return { ok: false, code: 'invalid-file', message: 'Questo file non è un PDF valido.' };
   }

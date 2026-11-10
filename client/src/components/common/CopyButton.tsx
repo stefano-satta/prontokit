@@ -1,12 +1,12 @@
 import { Check, Copy } from 'lucide-react';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
-import { Button } from './Button';
+import { Button, type ButtonSize, type ButtonVariant } from './Button';
 
 interface CopyButtonProps {
   value: string;
   label?: string;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'md' | 'lg';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   compact?: boolean;
   disabled?: boolean;
 }
