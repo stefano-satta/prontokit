@@ -58,6 +58,7 @@ Il sito è statico e si pubblica su Netlify dal repository GitHub `stefano-satta
 - **SPA**: ogni percorso che non è un file reale va a `index.html` con stato 200, così React Router gestisce le route e la pagina 404.
 - **Badge di Netlify**: sul piano gratuito Netlify inietta `/.netlify/scripts/hud`, che disegna il badge in un iframe `srcdoc` con uno script inline. La CSP lo consente tramite hash (`NETLIFY_BADGE_SCRIPT_HASH` in `client/vite/contentSecurityPolicy.ts`): se Netlify cambia lo script, la console del sito mostra un errore CSP con il nuovo hash da copiare lì.
 - **Header**: `frame-ancestors 'none'` (il resto della CSP è nel `<meta>` generato dal build), `nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` con il solo microfono (per la trascrizione vocale), `Cross-Origin-Opener-Policy`. Gli asset con hash in `/assets/` sono in cache per un anno.
+- **SEO e anteprime social**: in `client/index.html` ci sono description, canonical, Open Graph e card di X, con URL assoluti su `https://prontokit.netlify.app`. Sono statici e uguali per tutte le route, perché i crawler dei social non eseguono JavaScript. L'immagine di anteprima è `client/public/og-image.png` (1200×630). Se cambia il dominio, aggiorna gli URL in `index.html`.
 
 Per provare la build di produzione in locale: `npm run build`, poi `npm run preview -w client` (porta 4173).
 

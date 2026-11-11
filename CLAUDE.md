@@ -163,6 +163,7 @@ Il README ha il dettaglio su funzionamento e privacy; `client/PRODUCT.md` ha il 
 - In sospeso, da non implementare senza indicazioni dell'utente:
   - **Riassunto PDF via AI:** il piano gratuito di Gemini non si può usare per utenti nel SEE (EEA).
 - Repository git su GitHub (`stefano-satta/prontokit`, pubblico): fai commit e push solo se l'utente lo chiede. Niente segreti nel repository.
+- **SEO e anteprime social:** tag statici in `client/index.html` (description, canonical, Open Graph, card di X) con URL assoluti su `https://prontokit.netlify.app`; immagine `public/og-image.png` 1200×630. Se cambia il dominio o si aggiunge un'utility, aggiorna quei tag.
 - **Deploy:** Netlify collegato a GitHub, configurato in `netlify.toml` (build, regola SPA, header di sicurezza e cache). Una nuova pagina o API del browser
   può richiedere di aggiornare `Permissions-Policy` lì. Un futuro backend potrebbe andare su Firebase, solo con piani gratuiti (scelta dell'utente).
 
